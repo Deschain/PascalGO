@@ -1,0 +1,272 @@
+/* Seccion de opctiones */
+options{
+	IGNORE_CASE = true;
+}
+
+/* Seccion de ejecucion */
+PARSER_BEGIN(PascalGO)
+	package pascalGO.gramatica;
+	/* Imports */
+	
+	public class PascalGO 
+	{
+		
+		public static void main (String[] argum) throws ParseException 
+		{
+			PascalGO analizador = new PascalGO(System.in);
+			//Llamar al metodo que reconoce la primera expresion del sintactico
+			analizador.programaCompleto();
+			//Mensajes de salida como exito
+			System.out.println("Todo ha ido bien");
+		}
+	}
+PARSER_END(PascalGO)
+
+/* Seccion de sintaxis */
+	
+	void programaCompleto() :
+	{ }
+	{
+		programa() <EOF>
+	}
+	
+	/* Regla 1 */
+	void programa():
+	{}
+	{
+		<PROGRAM><ID>";"bloque()
+	}
+	
+	/* Regla 2 */
+	void bloque():
+	{}
+	{
+		declaracion()grupoSent()
+	}
+	
+	/* Regla 3 */
+	void declaracion():
+	{}
+	{
+		[defCte()][defTip()][defVar()]{ defSubpr() }
+	}
+	
+	/* Regla 4 */
+	void defCte():
+	{}
+	{	
+		//Revisar que javaCC ofrece pontencial para definir mejor esta expresion 
+		<CONST> unaConst() ";" {unaConst()";"}
+	}
+	
+	/* Regla 5 */
+	void unaConst():
+	{}
+	{
+		<ID> "=" constante()
+	}
+	
+	/* Regla 6 */
+	void defTip():
+	{}
+	{
+		<TYPE> untipo() ";" {untipo()";"}
+	}
+	
+	/* Regla 7 */
+	void untipo():
+	{}
+	{
+		<ID> tipoEstr()
+	}
+	
+	/* Regla 8 */
+	void tipoEstr():
+	{}
+	{
+			estrTab()
+	/* Regla 9 */
+		|	estrReg()
+	}
+	
+	/* Regla 10 */
+	void esrtTab():
+	{}
+	{
+		<ARRAY> "[" constante() ".." constante() "]" <OF> <ID>
+	}
+	
+	/* Regla 11 */
+	void estrReg():
+	{}
+	{
+		<RECORD> listaVar() {listaVar() ";"} <END>
+	}
+	
+	/* Regla 12 */
+	void defVar():
+	{}
+	{
+		<VAR> listVar() ";" {listaVar()";"}
+	}
+	
+	/* Regla 13 */
+	void defSubo():
+	{}
+	{
+		<PROCEDURE> <ID> [ "(" parFormales(): ")" ] ";" bloque() ";"
+	}
+	
+	/* Regla 14 */
+	void parFormales():
+	{}
+	{
+		listaParam() {";" listaParam()}
+	}
+	
+	/* Regla 15 */
+	void listaParam():
+	{}
+	{
+		{<VAR>} listaVar()
+	}
+	
+	/* Regla 16 */
+	void listaVar():
+	{}
+	{
+		<ID> {","<ID>}":"<ID>
+	}
+	
+	/* Regla 17 */
+	void grupoSent():
+	{}
+	{
+		<BEGIN> sentencia() {";" sentencia()} <END>
+	}
+	
+	/* Regla 18 */
+	void sentencia():
+	{}
+	{
+			asignLlamada()
+	/* Regla 19 */
+		|	condicional()
+	/* Regla 20 */
+		|	ciclica()
+	/* Regla 21 */
+		|	grupoSent()
+	/* Regla 22 */
+		|	vacio()
+	}
+	
+	/* Regla 23 */
+	void asignLlamada():
+	{}
+	{
+		<ID> restoAsignLlam()
+	}
+	
+	/* Regla 24 */
+	void restoAsignLlam():
+	{}
+	{
+			restoNombre() ":=" expresion()
+	/* Regla 25 */
+		|	"(" parLlamada() ")"
+	/* Regla 26 */
+		|	vacio()
+	}
+	
+	/* Regla 27 */
+	void condicional():
+	{}
+	{
+		<IF> expresion() <THEN> sentencia() [<ELSE> sentencia()]
+	}
+	
+	/* Regla 28 */
+	void ciclica():
+	{}
+	{
+		<WHILE> expresion() <DO> sentencia()
+	}
+	
+	
+/* Seccion de lexico */
+
+/* Caracteres que se omiten */
+	SKIP:{
+	  " "
+	  | "\r"
+	  | "\t"
+	  | "\n"
+	}
+
+/* Palabras reservadas */
+	TOKEN:{
+		<AND: 	"and">
+		<ARRAY: "array">
+		<BEGIN:	"begin">
+		<CONST: "const">
+		<DIV:	"div">
+		<DO:	"do">
+		<ELSE:	"else">
+		<END:	"end"> 
+		<IF:	"if">
+		<MOD:	"mod">
+		<NOT:	"not">
+		<OF:	"of">
+		<OR:	"or">
+		<PROCEDURE:	"procedure">
+		<PROGRAM:	"program">
+		<RECORD:	"record">
+		<THEN:	"then">
+		<TYPE:	"type">	
+		<VAR:	"var">
+		<WHILE:	"while">
+	}
+
+/* Operadores aritmeticos */
+	TOKEN:{
+	  <SUMA:	"+">
+	  <RESTA:	"-">
+	  <MULT:	"*">
+	}
+
+/* Operadores relacionales */
+	TOKEN:{
+	  ﻿<MAYOR:	">">
+	  <MAYORIG:	">=">
+	  <MENOR:	"<">
+	  <MENORIG:	"<=">
+	  <IGUAL:	"=">
+	  <DESIGUAL:	"<>">
+	}
+
+/* Signos de puntuacion */
+	TOKEN:{
+	  <PARENTESISIZ:	"(">
+	  <PARENTESISDE:	")">
+	  <CORCHETEIZ:		"[">
+	  <CORCHETEDE:		"]">
+	  <COMA:			",">
+	  <PUNTOYCOMA:		";">
+	  <PUNTO:			".">
+	  <DOSPUNTOS:		":">
+	}
+
+/* Asignacion */
+	TOKEN:{
+	  <ASIGNACION:	":=">
+	}
+
+/* Rango */
+	TOKEN:{
+	  <RANGO:		"..">
+	}
+	
+/* Identificador */
+	TOKEN:{
+  		<ID: ["a".."z"]>
+	}
