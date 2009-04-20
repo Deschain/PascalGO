@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="C:/Documents and Settings/Deschain/Mis documentos/Curso 2008-09/Procesadores de Lenguajes II/Practica/Aplicaciones/JavaCC/javacc-4.2/bin/lib/javacc.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
