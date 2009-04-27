@@ -48,7 +48,7 @@ PARSER_END(PascalGO)
 	void declaracion():
 	{}
 	{
-		[defCte()][defTip()][defVar()]{ defSubpr() }
+		[defCte()][defTip()][defVar()](defSubpr())*
 	}
 	
 	/* Regla 4 */
@@ -56,7 +56,7 @@ PARSER_END(PascalGO)
 	{}
 	{	
 		//Revisar que javaCC ofrece pontencial para definir mejor esta expresion 
-		<CONST> unaConst() ";" {unaConst()";"}
+		<CONST> unaConst() ";" (unaConst()";")*
 	}
 	
 	/* Regla 5 */
@@ -70,7 +70,7 @@ PARSER_END(PascalGO)
 	void defTip():
 	{}
 	{
-		<TYPE> untipo() ";" {untipo()";"}
+		<TYPE> untipo() ";" (untipo()";")*
 	}
 	
 	/* Regla 7 */
@@ -86,11 +86,11 @@ PARSER_END(PascalGO)
 	{
 			estrTab()
 	/* Regla 9 */
-		|	estrReg()
+		|	estrReg() bloque()
 	}
 	
 	/* Regla 10 */
-	void esrtTab():
+	void estrTab():
 	{}
 	{
 		<ARRAY> "[" constante() ".." constante() "]" <OF> <ID>
@@ -100,55 +100,56 @@ PARSER_END(PascalGO)
 	void estrReg():
 	{}
 	{
-		<RECORD> listaVar() {listaVar() ";"} <END>
+		<RECORD> listaVar() (listaVar() ";")* <END>
 	}
 	
 	/* Regla 12 */
 	void defVar():
 	{}
 	{
-		<VAR> listVar() ";" {listaVar()";"}
+		<VAR> listaVar() ";" (listaVar()";")*
 	}
 	
 	/* Regla 13 */
-	void defSubo():
+	void defSubpr():
 	{}
 	{
-		<PROCEDURE> <ID> [ "(" parFormales(): ")" ] ";" bloque() ";"
+		<PROCEDURE> <ID> [ "(" parFormales()":" ")" ] ";" bloque() ";"
 	}
 	
 	/* Regla 14 */
 	void parFormales():
 	{}
 	{
-		listaParam() {";" listaParam()}
+		listaParam() (";" listaParam())*
 	}
 	
 	/* Regla 15 */
 	void listaParam():
 	{}
 	{
-		{<VAR>} listaVar()
+		(<VAR>)* listaVar()
 	}
 	
 	/* Regla 16 */
 	void listaVar():
 	{}
 	{
-		<ID> {","<ID>}":"<ID>
+		<ID> (","<ID>)* ":" <ID>
 	}
 	
 	/* Regla 17 */
 	void grupoSent():
 	{}
 	{
-		<BEGIN> sentencia() {";" sentencia()} <END>
+		<BEGIN> sentencia() (";" sentencia())* <END>
 	}
 	
 	/* Regla 18 */
 	void sentencia():
 	{}
 	{
+		[
 			asignLlamada()
 	/* Regla 19 */
 		|	condicional()
@@ -157,7 +158,8 @@ PARSER_END(PascalGO)
 	/* Regla 21 */
 		|	grupoSent()
 	/* Regla 22 */
-		|	vacio()
+		]
+
 	}
 	
 	/* Regla 23 */
@@ -171,11 +173,12 @@ PARSER_END(PascalGO)
 	void restoAsignLlam():
 	{}
 	{
-			restoNombre() ":=" expresion()
+		[
+				restoNombre() ":=" expresion()
 	/* Regla 25 */
-		|	"(" parLlamada() ")"
+			|	"(" parLlamada() ")"
+		]
 	/* Regla 26 */
-		|	vacio()
 	}
 	
 	/* Regla 27 */
@@ -192,6 +195,78 @@ PARSER_END(PascalGO)
 		<WHILE> expresion() <DO> sentencia()
 	}
 	
+	/* Regla 29 */
+	void parLlamada():
+	{}
+	{
+		expresion() ( <COMA> expresion() )*
+	}
+	
+	/* Regla 30 */
+	void expresion():
+	{}
+	{
+		exprSimple() [ <OPREL> exprSimple() ] 
+	}
+	
+	/* Regla 31 */
+	void exprSimple():
+	{}
+	{
+		[ signo() ] termino() ( <OPADT> termino() )*
+	}
+	
+	/* Regla 32 */
+	void termino():
+	{}
+	{
+		factor() ( <OPMUL> factor() )*
+	}
+	
+	/* Regla 33 */
+	void factor():
+	{}
+	{
+			<CTE>
+	/* Regla 34 */
+		|	<ID> restoNombre()
+	/* Regla 35 */	
+		| 	<NOT> factor()
+	/* Regla 36 */
+		|	"(" expresion() ")"
+	}
+	
+	/* Regla 37 */
+	void restoNombre():
+	{}
+	{
+		( selector() )*
+	}
+	
+	/* Regla 38 */
+	void selector():
+	{}
+	{
+			"[" expresion() "]"
+	/* Regla 39 */
+		|	"." <ID>
+	}
+	
+	/* Regla 40 */
+	void constante():
+	{}
+	{
+		[ signo() ] cteSinSigno()
+	}
+	
+	/* Regla 40 */
+	void cteSinSigno():
+	{}
+	{
+			<ID>
+		|	<CTE>
+	}
+	
 	
 /* Seccion de lexico */
 
@@ -205,55 +280,55 @@ PARSER_END(PascalGO)
 
 /* Palabras reservadas */
 	TOKEN:{
-		<AND: 	"and">
-		<ARRAY: "array">
-		<BEGIN:	"begin">
-		<CONST: "const">
-		<DIV:	"div">
-		<DO:	"do">
-		<ELSE:	"else">
-		<END:	"end"> 
-		<IF:	"if">
-		<MOD:	"mod">
-		<NOT:	"not">
-		<OF:	"of">
-		<OR:	"or">
-		<PROCEDURE:	"procedure">
-		<PROGRAM:	"program">
-		<RECORD:	"record">
-		<THEN:	"then">
-		<TYPE:	"type">	
-		<VAR:	"var">
-		<WHILE:	"while">
+			<AND: 	"and">
+		|	<ARRAY: "array">
+		|	<BEGIN:	"begin">
+		|	<CONST: "const">
+		|	<DIV:	"div">
+		|	<DO:	"do">
+		|	<ELSE:	"else">
+		|	<END:	"end"> 
+		|	<IF:	"if">
+		|	<MOD:	"mod">
+		|	<NOT:	"not">
+		|	<OF:	"of">
+		|	<OR:	"or">
+		|	<PROCEDURE:	"procedure">
+		|	<PROGRAM:	"program">
+		|	<RECORD:	"record">
+		|	<THEN:	"then">
+		|	<TYPE:	"type">	
+		|	<VAR:	"var">
+		|	<WHILE:	"while">
 	}
 
 /* Operadores aritmeticos */
 	TOKEN:{
-	  <SUMA:	"+">
-	  <RESTA:	"-">
-	  <MULT:	"*">
+	  	<SUMA:	"+">
+	  |	<RESTA:	"-">
+	  |	<MULT:	"*">
 	}
 
 /* Operadores relacionales */
 	TOKEN:{
-	  ﻿<MAYOR:	">">
-	  <MAYORIG:	">=">
-	  <MENOR:	"<">
-	  <MENORIG:	"<=">
-	  <IGUAL:	"=">
-	  <DESIGUAL:	"<>">
+	 	<MAYOR:		">">
+	 |	<MAYORIG:	">=">
+	 |	<MENOR:		"<">
+	 |	<MENORIG:	"<=">
+	 |	<IGUAL:		"=">
+	 |	<DESIGUAL:	"<>">
 	}
 
 /* Signos de puntuacion */
 	TOKEN:{
-	  <PARENTESISIZ:	"(">
-	  <PARENTESISDE:	")">
-	  <CORCHETEIZ:		"[">
-	  <CORCHETEDE:		"]">
-	  <COMA:			",">
-	  <PUNTOYCOMA:		";">
-	  <PUNTO:			".">
-	  <DOSPUNTOS:		":">
+	  	<PARENTESISIZ:	"(">
+	  |	<PARENTESISDE:	")">
+	  |	<CORCHETEIZ:	"[">
+	  |	<CORCHETEDE:	"]">
+	  |	<COMA:			",">
+	  |	<PUNTOYCOMA:	";">
+	  |	<PUNTO:			".">
+	  |	<DOSPUNTOS:		":">
 	}
 
 /* Asignacion */
@@ -268,5 +343,5 @@ PARSER_END(PascalGO)
 	
 /* Identificador */
 	TOKEN:{
-  		<ID: ["a".."z"]>
+  		<ID: ["a"-"z"]>
 	}
