@@ -34,7 +34,7 @@ PARSER_END(PascalGO)
 	void programa():
 	{}
 	{
-		<PROGRAM><ID>";"bloque()
+		<PROGRAM><ID><PUNTOYCOMA>bloque()
 	}
 	
 	/* Regla 2 */
@@ -56,21 +56,21 @@ PARSER_END(PascalGO)
 	{}
 	{	
 		//Revisar que javaCC ofrece pontencial para definir mejor esta expresion 
-		<CONST> unaConst() ";" (unaConst()";")*
+		<CONST> unaConst() <PUNTOYCOMA> (unaConst()<PUNTOYCOMA>)*
 	}
 	
 	/* Regla 5 */
 	void unaConst():
 	{}
 	{
-		<ID> "=" constante()
+		<ID> <IGUAL> constante()
 	}
 	
 	/* Regla 6 */
 	void defTip():
 	{}
 	{
-		<TYPE> untipo() ";" (untipo()";")*
+		<TYPE> untipo() <PUNTOYCOMA> (untipo()<PUNTOYCOMA>)*
 	}
 	
 	/* Regla 7 */
@@ -93,35 +93,35 @@ PARSER_END(PascalGO)
 	void estrTab():
 	{}
 	{
-		<ARRAY> "[" constante() ".." constante() "]" <OF> <ID>
+		<ARRAY> <CORCHETEIZ> constante() <RANGO> constante() <CORCHETEDE> <OF> <ID>
 	}
 	
 	/* Regla 11 */
 	void estrReg():
 	{}
 	{
-		<RECORD> listaVar() (listaVar() ";")* <END>
+		<RECORD> listaVar() (listaVar() <PUNTOYCOMA>)* <END>
 	}
 	
 	/* Regla 12 */
 	void defVar():
 	{}
 	{
-		<VAR> listaVar() ";" (listaVar()";")*
+		<VAR> listaVar() <PUNTOYCOMA> (listaVar()<PUNTOYCOMA>)*
 	}
 	
 	/* Regla 13 */
 	void defSubpr():
 	{}
 	{
-		<PROCEDURE> <ID> [ "(" parFormales()":" ")" ] ";" bloque() ";"
+		<PROCEDURE> <ID> [ <PARENTESISIZ> parFormales()<DOSPUNTOS> <PARENTESISDE> ] <PUNTOYCOMA> bloque() <PUNTOYCOMA>
 	}
 	
 	/* Regla 14 */
 	void parFormales():
 	{}
 	{
-		listaParam() (";" listaParam())*
+		listaParam() (<PUNTOYCOMA> listaParam())*
 	}
 	
 	/* Regla 15 */
@@ -135,14 +135,14 @@ PARSER_END(PascalGO)
 	void listaVar():
 	{}
 	{
-		<ID> (","<ID>)* ":" <ID>
+		<ID> (<COMA><ID>)* <DOSPUNTOS> <ID>
 	}
 	
 	/* Regla 17 */
 	void grupoSent():
 	{}
 	{
-		<BEGIN> sentencia() (";" sentencia())* <END>
+		<BEGIN> sentencia() (<PUNTOYCOMA> sentencia())* <END>
 	}
 	
 	/* Regla 18 */
@@ -174,9 +174,9 @@ PARSER_END(PascalGO)
 	{}
 	{
 		[
-				restoNombre() ":=" expresion()
+				restoNombre() <ASIGNACION> expresion()
 	/* Regla 25 */
-			|	"(" parLlamada() ")"
+			|	<PARENTESISIZ> parLlamada() <PARENTESISDE>
 		]
 	/* Regla 26 */
 	}
@@ -206,21 +206,21 @@ PARSER_END(PascalGO)
 	void expresion():
 	{}
 	{
-		exprSimple() [ <OPREL> exprSimple() ] 
+		exprSimple() [ opRel() exprSimple() ] 
 	}
 	
 	/* Regla 31 */
 	void exprSimple():
 	{}
 	{
-		[ signo() ] termino() ( <OPADT> termino() )*
+		[ signo() ] termino() ( opAdt() termino() )*
 	}
 	
 	/* Regla 32 */
 	void termino():
 	{}
 	{
-		factor() ( <OPMUL> factor() )*
+		factor() ( opMul() factor() )*
 	}
 	
 	/* Regla 33 */
@@ -233,7 +233,7 @@ PARSER_END(PascalGO)
 	/* Regla 35 */	
 		| 	<NOT> factor()
 	/* Regla 36 */
-		|	"(" expresion() ")"
+		|	<PARENTESISIZ> expresion() <PARENTESISDE>
 	}
 	
 	/* Regla 37 */
@@ -247,9 +247,9 @@ PARSER_END(PascalGO)
 	void selector():
 	{}
 	{
-			"[" expresion() "]"
+			<CORCHETEIZ> expresion() <CORCHETEDE>
 	/* Regla 39 */
-		|	"." <ID>
+		|	<PUNTO> <ID>
 	}
 	
 	/* Regla 40 */
@@ -267,6 +267,44 @@ PARSER_END(PascalGO)
 		|	<CTE>
 	}
 	
+	/* Regla 41 */
+	void opRel():
+	{}
+	{
+			<MAYOR>
+		|	<MAYORIG>
+		|	<MENOR>
+		|	<MENORIG>
+		|	<IGUAL>
+		|	<DESIGUAL>
+	}
+	
+	/* Regla 42 */
+	void opAdt():
+	{}
+	{
+			<SUMA>
+		|	<RESTA>
+		|	<OR>
+	}
+	
+	/* Regla 43 */
+	void opMul():
+	{}
+	{
+			<MULT>
+		|	<DIV>
+		|	<MOD>
+		|	<AND>
+	}
+	
+	/* Regla 44 */
+	void signo():
+	{}
+	{
+			<SUMA>
+		|	<RESTA>
+	}
 	
 /* Seccion de lexico */
 
@@ -344,4 +382,9 @@ PARSER_END(PascalGO)
 /* Identificador */
 	TOKEN:{
   		<ID: ["a"-"z"]>
+	}
+	
+/* Constante */
+	TOKEN:{
+		<CTE: ["0"-"9"]>
 	}
