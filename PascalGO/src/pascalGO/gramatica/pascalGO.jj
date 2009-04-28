@@ -259,7 +259,7 @@ PARSER_END(PascalGO)
 		[ signo() ] cteSinSigno()
 	}
 	
-	/* Regla 40 */
+	/* Regla 41 */
 	void cteSinSigno():
 	{}
 	{
@@ -267,7 +267,7 @@ PARSER_END(PascalGO)
 		|	<CTE>
 	}
 	
-	/* Regla 41 */
+	/* Regla 42 */
 	void opRel():
 	{}
 	{
@@ -279,7 +279,7 @@ PARSER_END(PascalGO)
 		|	<DESIGUAL>
 	}
 	
-	/* Regla 42 */
+	/* Regla 43 */
 	void opAdt():
 	{}
 	{
@@ -288,7 +288,7 @@ PARSER_END(PascalGO)
 		|	<OR>
 	}
 	
-	/* Regla 43 */
+	/* Regla 44 */
 	void opMul():
 	{}
 	{
@@ -298,7 +298,7 @@ PARSER_END(PascalGO)
 		|	<AND>
 	}
 	
-	/* Regla 44 */
+	/* Regla 45 */
 	void signo():
 	{}
 	{
@@ -307,6 +307,7 @@ PARSER_END(PascalGO)
 	}
 	
 /* Seccion de lexico */
+	/* Faltan por identificar los comentarios, y un repaso a los tokens que utilizan ER */
 
 /* Caracteres que se omiten */
 	SKIP:{
@@ -381,10 +382,10 @@ PARSER_END(PascalGO)
 	
 /* Identificador */
 	TOKEN:{
-  		<ID: ["a"-"z"]>
+  		<ID: ["a"-"z"](["a"-"z","0"-"9"])*>
 	}
 	
 /* Constante */
 	TOKEN:{
-		<CTE: ["0"-"9"]>
+		<CTE: ["1"-"9"](["0"-"9"])*>
 	}
