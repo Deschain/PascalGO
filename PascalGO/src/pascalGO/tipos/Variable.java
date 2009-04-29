@@ -2,11 +2,12 @@ package pascalGO.tipos;
 
 public class Variable extends BasicType {
 	
-	public static final String VARIABLE = "variable";
+	public static final String INT = "integer";
+	public static final String BOOL = "boolean";
 
-	public Variable(String name) {
+	public Variable(String name, String type) {
 		super.setName(name);
-		super.setType(VARIABLE);
+		super.setType(type);
 		
 	}
 	
