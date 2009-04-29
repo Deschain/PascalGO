@@ -1,0 +1,400 @@
+/* Seccion de opctiones */
+options{
+	IGNORE_CASE = true;
+}
+
+/* Seccion de ejecucion */
+PARSER_BEGIN(PascalGO)
+	package pascalGO.gramatica;
+	/* Imports */
+	
+	public class PascalGO 
+	{
+		
+		public static void main (String[] argum) throws ParseException 
+		{
+			PascalGO analizador = new PascalGO(System.in);
+			//Llamar al metodo que reconoce la primera expresion del sintactico
+			analizador.start();
+			//Mensajes de salida como exito
+			System.out.println("Todo ha ido bien");
+		}
+	}
+PARSER_END(PascalGO)
+
+/* Seccion de sintaxis */
+	
+	SimpleNode start():
+	{}
+	{
+		programaCompleto()
+		{
+			return jjtThis ;
+		}
+	}
+	
+	void programaCompleto():
+	{ }
+	{
+		programa() <EOF>
+	}
+	
+	/* Regla 1 */
+	void programa():
+	{}
+	{
+		<PROGRAM><ID><PUNTOYCOMA>bloque()
+	}
+	
+	/* Regla 2 */
+	void bloque():
+	{}
+	{
+		declaracion()grupoSent()
+	}
+	
+	/* Regla 3 */
+	void declaracion():
+	{}
+	{
+		[defCte()][defTip()][defVar()](defSubpr())*
+	}
+	
+	/* Regla 4 */
+	void defCte():
+	{}
+	{	
+		//Revisar que javaCC ofrece pontencial para definir mejor esta expresion 
+		<CONST> unaConst() <PUNTOYCOMA> (unaConst()<PUNTOYCOMA>)*
+	}
+	
+	/* Regla 5 */
+	void unaConst():
+	{}
+	{
+		<ID> <IGUAL> constante()
+	}
+	
+	/* Regla 6 */
+	void defTip():
+	{}
+	{
+		<TYPE> untipo() <PUNTOYCOMA> (untipo()<PUNTOYCOMA>)*
+	}
+	
+	/* Regla 7 */
+	void untipo():
+	{}
+	{
+		<ID> tipoEstr()
+	}
+	
+	/* Regla 8 */
+	void tipoEstr():
+	{}
+	{
+			estrTab()
+	/* Regla 9 */
+		|	estrReg() bloque()
+	}
+	
+	/* Regla 10 */
+	void estrTab():
+	{}
+	{
+		<ARRAY> <CORCHETEIZ> constante() <RANGO> constante() <CORCHETEDE> <OF> <ID>
+	}
+	
+	/* Regla 11 */
+	void estrReg():
+	{}
+	{
+		<RECORD> listaVar() (listaVar() <PUNTOYCOMA>)* <END>
+	}
+	
+	/* Regla 12 */
+	void defVar():
+	{}
+	{
+		<VAR> listaVar() <PUNTOYCOMA> (listaVar()<PUNTOYCOMA>)*
+	}
+	
+	/* Regla 13 */
+	void defSubpr():
+	{}
+	{
+		<PROCEDURE> <ID> [ <PARENTESISIZ> parFormales()<DOSPUNTOS> <PARENTESISDE> ] <PUNTOYCOMA> bloque() <PUNTOYCOMA>
+	}
+	
+	/* Regla 14 */
+	void parFormales():
+	{}
+	{
+		listaParam() (<PUNTOYCOMA> listaParam())*
+	}
+	
+	/* Regla 15 */
+	void listaParam():
+	{}
+	{
+		(<VAR>)* listaVar()
+	}
+	
+	/* Regla 16 */
+	void listaVar():
+	{}
+	{
+		<ID> (<COMA><ID>)* <DOSPUNTOS> <ID>
+	}
+	
+	/* Regla 17 */
+	void grupoSent():
+	{}
+	{
+		<BEGIN> sentencia() (<PUNTOYCOMA> sentencia())* <END>
+	}
+	
+	/* Regla 18 */
+	void sentencia():
+	{}
+	{
+		[
+			asignLlamada()
+	/* Regla 19 */
+		|	condicional()
+	/* Regla 20 */
+		|	ciclica()
+	/* Regla 21 */
+		|	grupoSent()
+	/* Regla 22 */
+		]
+
+	}
+	
+	/* Regla 23 */
+	void asignLlamada():
+	{}
+	{
+		<ID> restoAsignLlam()
+	}
+	
+	/* Regla 24 */
+	void restoAsignLlam():
+	{}
+	{
+		[
+				restoNombre() <ASIGNACION> expresion()
+	/* Regla 25 */
+			|	<PARENTESISIZ> parLlamada() <PARENTESISDE>
+		]
+	/* Regla 26 */
+	}
+	
+	/* Regla 27 */
+	void condicional():
+	{}
+	{
+		<IF> expresion() <THEN> sentencia() [<ELSE> sentencia()]
+	}
+	
+	/* Regla 28 */
+	void ciclica():
+	{}
+	{
+		<WHILE> expresion() <DO> sentencia()
+	}
+	
+	/* Regla 29 */
+	void parLlamada():
+	{}
+	{
+		expresion() ( <COMA> expresion() )*
+	}
+	
+	/* Regla 30 */
+	void expresion():
+	{}
+	{
+		exprSimple() [ opRel() exprSimple() ] 
+	}
+	
+	/* Regla 31 */
+	void exprSimple():
+	{}
+	{
+		[ signo() ] termino() ( opAdt() termino() )*
+	}
+	
+	/* Regla 32 */
+	void termino():
+	{}
+	{
+		factor() ( opMul() factor() )*
+	}
+	
+	/* Regla 33 */
+	void factor():
+	{}
+	{
+			<CTE>
+	/* Regla 34 */
+		|	<ID> restoNombre()
+	/* Regla 35 */	
+		| 	<NOT> factor()
+	/* Regla 36 */
+		|	<PARENTESISIZ> expresion() <PARENTESISDE>
+	}
+	
+	/* Regla 37 */
+	void restoNombre():
+	{}
+	{
+		( selector() )*
+	}
+	
+	/* Regla 38 */
+	void selector():
+	{}
+	{
+			<CORCHETEIZ> expresion() <CORCHETEDE>
+	/* Regla 39 */
+		|	<PUNTO> <ID>
+	}
+	
+	/* Regla 40 */
+	void constante():
+	{}
+	{
+		[ signo() ] cteSinSigno()
+	}
+	
+	/* Regla 41 */
+	void cteSinSigno():
+	{}
+	{
+			<ID>
+		|	<CTE>
+	}
+	
+	/* Regla 42 */
+	void opRel():
+	{}
+	{
+			<MAYOR>
+		|	<MAYORIG>
+		|	<MENOR>
+		|	<MENORIG>
+		|	<IGUAL>
+		|	<DESIGUAL>
+	}
+	
+	/* Regla 43 */
+	void opAdt():
+	{}
+	{
+			<SUMA>
+		|	<RESTA>
+		|	<OR>
+	}
+	
+	/* Regla 44 */
+	void opMul():
+	{}
+	{
+			<MULT>
+		|	<DIV>
+		|	<MOD>
+		|	<AND>
+	}
+	
+	/* Regla 45 */
+	void signo():
+	{}
+	{
+			<SUMA>
+		|	<RESTA>
+	}
+	
+/* Seccion de lexico */
+	/* Faltan por identificar los comentarios, y un repaso a los tokens que utilizan ER */
+
+/* Caracteres que se omiten */
+	SKIP:{
+	  " "
+	  | "\r"
+	  | "\t"
+	  | "\n"
+	}
+
+/* Palabras reservadas */
+	TOKEN:{
+			<AND: 	"and">
+		|	<ARRAY: "array">
+		|	<BEGIN:	"begin">
+		|	<CONST: "const">
+		|	<DIV:	"div">
+		|	<DO:	"do">
+		|	<ELSE:	"else">
+		|	<END:	"end"> 
+		|	<IF:	"if">
+		|	<MOD:	"mod">
+		|	<NOT:	"not">
+		|	<OF:	"of">
+		|	<OR:	"or">
+		|	<PROCEDURE:	"procedure">
+		|	<PROGRAM:	"program">
+		|	<RECORD:	"record">
+		|	<THEN:	"then">
+		|	<TYPE:	"type">	
+		|	<VAR:	"var">
+		|	<WHILE:	"while">
+	}
+
+/* Operadores aritmeticos */
+	TOKEN:{
+	  	<SUMA:	"+">
+	  |	<RESTA:	"-">
+	  |	<MULT:	"*">
+	}
+
+/* Operadores relacionales */
+	TOKEN:{
+	 	<MAYOR:		">">
+	 |	<MAYORIG:	">=">
+	 |	<MENOR:		"<">
+	 |	<MENORIG:	"<=">
+	 |	<IGUAL:		"=">
+	 |	<DESIGUAL:	"<>">
+	}
+
+/* Signos de puntuacion */
+	TOKEN:{
+	  	<PARENTESISIZ:	"(">
+	  |	<PARENTESISDE:	")">
+	  |	<CORCHETEIZ:	"[">
+	  |	<CORCHETEDE:	"]">
+	  |	<COMA:			",">
+	  |	<PUNTOYCOMA:	";">
+	  |	<PUNTO:			".">
+	  |	<DOSPUNTOS:		":">
+	}
+
+/* Asignacion */
+	TOKEN:{
+	  <ASIGNACION:	":=">
+	}
+
+/* Rango */
+	TOKEN:{
+	  <RANGO:		"..">
+	}
+	
+/* Identificador */
+	TOKEN:{
+  		<ID: ["a"-"z"](["a"-"z","0"-"9"])*>
+	}
+	
+/* Constante */
+	TOKEN:{
+		<CTE: ["1"-"9"](["0"-"9"])*>
+	}
