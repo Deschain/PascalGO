@@ -1,4 +1,4 @@
-package pascalGO.tipos;
+package pascalGO.types;
 
 public class Procedure extends BasicType{
 

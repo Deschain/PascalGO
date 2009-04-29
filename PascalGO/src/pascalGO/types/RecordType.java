@@ -1,4 +1,4 @@
-package pascalGO.tipos;
+package pascalGO.types;
 
 import java.util.ArrayList;
 import java.util.Iterator;
