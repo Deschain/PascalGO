@@ -25,7 +25,7 @@ public class RecordType extends Variable{
 		Iterator<Variable> aux = variables.iterator();
 		while(aux.hasNext()){
 			Variable auxVar = aux.next();
-			if (auxVar.getName()== name){
+			if (auxVar.getName().equals(name)){
 				return auxVar; 
 			}
 		}
