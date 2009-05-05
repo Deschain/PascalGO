@@ -6,7 +6,8 @@ options{
 /* Seccion de ejecucion */
 PARSER_BEGIN(PascalGO)
 	package pascalGO.grammar;
-	/* Imports */
+	/* Imports */	
+	import pascalGO.types.*;
 	
 	public class PascalGO 
 	{
@@ -71,9 +72,14 @@ PARSER_END(PascalGO)
 	
 	/* Regla 5 */
 	void unaConst():
-	{}
 	{
-		<ID> <IGUAL> constante()
+		Token name;
+	}
+	{
+		name = <ID> <IGUAL> constante()
+		{
+			Variable constante = new Variable(name.image,"integer");
+		}
 	}
 	
 	/* Regla 6 */

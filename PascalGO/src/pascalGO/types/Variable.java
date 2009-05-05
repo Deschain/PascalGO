@@ -4,6 +4,8 @@ public class Variable extends BasicType {
 	
 	public static final String INT = "integer";
 	public static final String BOOL = "boolean";
+	
+	private int value;
 
 	public Variable(String name, String type) {
 		super.setName(name);
@@ -11,6 +13,12 @@ public class Variable extends BasicType {
 		
 	}
 	
+	public void setValue(int value){
+		this.value = value;
+	}
 	
 
+	public int getValue(){
+		return this.value;
+	}
 }
