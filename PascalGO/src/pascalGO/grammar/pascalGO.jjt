@@ -5,7 +5,7 @@ options{
 
 /* Seccion de ejecucion */
 PARSER_BEGIN(PascalGO)
-	package pascalGO.gramatica;
+	package pascalGO.grammar;
 	/* Imports */
 	
 	public class PascalGO 
@@ -15,7 +15,8 @@ PARSER_BEGIN(PascalGO)
 		{
 			PascalGO analizador = new PascalGO(System.in);
 			//Llamar al metodo que reconoce la primera expresion del sintactico
-			analizador.start();
+			SimpleNode tree = analizador.start();
+			tree.dump("");
 			//Mensajes de salida como exito
 			System.out.println("Todo ha ido bien");
 		}
@@ -36,7 +37,7 @@ PARSER_END(PascalGO)
 	void programaCompleto():
 	{ }
 	{
-		programa() <EOF>
+		programa() <PUNTO>
 	}
 	
 	/* Regla 1 */
