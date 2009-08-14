@@ -2,23 +2,34 @@ package pascalGO.types;
 
 public class Variable extends BasicType {
 	
-	public static final String INT = "integer";
-	public static final String BOOL = "boolean";
-	
-	private int value;
+	private String type;
+	private String access;
 
-	public Variable(String name, String type) {
+	public Variable(String name, String type, boolean access) {
 		super.setName(name);
-		super.setType(type);
-		
+		this.type = type;
+		if (access){
+			this.access = new String("dir");
+		}else{
+			this.access = new String("ref");
+		}
 	}
-	
-	public void setValue(int value){
-		this.value = value;
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	public String getAccess() {
+		return access;
+	}
+
+	public void setAccess(String access) {
+		this.access = access;
 	}
 	
 
-	public int getValue(){
-		return this.value;
-	}
 }

@@ -1,14 +1,14 @@
 /* Seccion de opctiones */
 options{
 	IGNORE_CASE = true;
+	VISITOR = true;
 }
 
 /* Seccion de ejecucion */
 PARSER_BEGIN(PascalGO)
 	package pascalGO.grammar;
 	/* Imports */	
-	import pascalGO.types.*;
-	
+		
 	public class PascalGO 
 	{
 		
@@ -72,14 +72,9 @@ PARSER_END(PascalGO)
 	
 	/* Regla 5 */
 	void unaConst():
+	{}
 	{
-		Token name;
-	}
-	{
-		name = <ID> <IGUAL> constante()
-		{
-			Variable constante = new Variable(name.image,"integer");
-		}
+		<ID> <IGUAL> constante()
 	}
 	
 	/* Regla 6 */
@@ -374,6 +369,11 @@ PARSER_END(PascalGO)
 	 |	<DESIGUAL:	"<>">
 	}
 
+/* Asignacion */
+	TOKEN:{
+	  <ASIGNACION:	":=">
+	}
+
 /* Signos de puntuacion */
 	TOKEN:{
 	  	<PARENTESISIZ:	"(">
@@ -386,10 +386,6 @@ PARSER_END(PascalGO)
 	  |	<DOSPUNTOS:		":">
 	}
 
-/* Asignacion */
-	TOKEN:{
-	  <ASIGNACION:	":=">
-	}
 
 /* Rango */
 	TOKEN:{
@@ -403,5 +399,5 @@ PARSER_END(PascalGO)
 	
 /* Constante */
 	TOKEN:{
-		<CTE: ["1"-"9"](["0"-"9"])*>
+			<CTE: ["1"-"9" ,"0"](["0"-"9"])* >
 	}
