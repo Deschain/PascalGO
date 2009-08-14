@@ -1,18 +1,18 @@
 package pascalGO.types;
 
-public class ArrayType extends Variable {
+public class ArrayType extends BasicType {
 
-	public static final String ARRAY = "array";
-	
 	private int rangoInferior = 0;
 	private int rangoSuperior = 0;
-	
-	private Variable kind = null;
-	
-	public ArrayType(String name){
-		super(name,ARRAY);
-	}	
-	
+	private String type;
+		
+	public ArrayType(String name, int inf, int sup, String type){
+		super.setName(name);
+		this.rangoInferior = inf;
+		this.rangoSuperior = sup;
+		this.type = type;
+	}
+
 	public int getRangoInferior() {
 		return rangoInferior;
 	}
@@ -29,21 +29,13 @@ public class ArrayType extends Variable {
 		this.rangoSuperior = rangoSuperior;
 	}
 
-	public Variable getKind() {
-		return kind;
+	public String getType() {
+		return type;
 	}
 
-	public void setKind(Variable kind) {
-		this.kind = kind;
-	}
+	public void setType(String type) {
+		this.type = type;
+	}	
 	
-	//Method that calculates if the bounds of the array are right
-	public boolean rangoCorrecto(){
-		if(rangoSuperior > rangoInferior){
-			return true;
-		}else{
-			return false;
-		}
-	}
-	
+
 }
