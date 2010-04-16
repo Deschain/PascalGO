@@ -72,7 +72,8 @@ PARSER_END(PascalGO)
 	
 	/* Regla 5 */
 	void unaConst():
-	{}
+	{
+	  }
 	{
 		<ID> <IGUAL> constante()
 	}
