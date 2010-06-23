@@ -12,14 +12,26 @@ PARSER_BEGIN(PascalGO)
 	public class PascalGO 
 	{
 		
-		public static void main (String[] argum) throws ParseException 
+		public static void main (String[] argum) throws ParseException
 		{
-			PascalGO analizador = new PascalGO(System.in);
+		  SimpleNode tree = null;
+			try			{			PascalGO analizador = new PascalGO(System.in);
 			//Llamar al metodo que reconoce la primera expresion del sintactico
-			SimpleNode tree = analizador.start();
+			tree = analizador.start();
 			tree.dump("");
 			//Mensajes de salida como exito
 			System.out.println("Todo ha ido bien");
+			}catch(ParseException error){
+			  int[][] expectedTokens = error.expectedTokenSequences;
+			  System.out.print("Se esperaba: ");
+			  for (int i = 0; i < expectedTokens.length; i++) {			    
+			  	for (int j = 0; j < expectedTokens[i].length; j++) {
+				        System.out.print(tokenImage[expectedTokens[i][j]]+' ');
+				  }			  }
+			  System.out.println("Y se ha recibido: "+error.currentToken.next.image);
+			  //tree.dump("");			  
+			}catch(Exception error){
+			  			}			
 		}
 	}
 PARSER_END(PascalGO)
@@ -44,8 +56,7 @@ PARSER_END(PascalGO)
 	/* Regla 1 */
 	void programa():
 	{}
-	{
-		<PROGRAM><ID><PUNTOYCOMA>bloque()
+	{	 	    <PROGRAM><ID><PUNTOYCOMA>bloque()	 	    
 	}
 	
 	/* Regla 2 */
