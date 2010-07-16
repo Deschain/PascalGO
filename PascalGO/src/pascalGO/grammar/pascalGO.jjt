@@ -6,16 +6,23 @@ options{
 
 /* Seccion de ejecucion */
 PARSER_BEGIN(PascalGO)
+
 	package pascalGO.grammar;
+	
 	/* Imports */	
 		
+	import pascalGO.table.SymbolTable;	
+	import pascalGO.types.*;	
+
 	public class PascalGO 
 	{
+		private static SymbolTable symbolTable = new SymbolTable();	
 		
 		public static void main (String[] argum) throws ParseException
 		{
+		
 		  SimpleNode tree = null;
-			try			{			PascalGO analizador = new PascalGO(System.in);
+			try			{			PascalGO analizador = new PascalGO(System.in);			
 			//Llamar al metodo que reconoce la primera expresion del sintactico
 			tree = analizador.start();
 			tree.dump("");
@@ -23,10 +30,11 @@ PARSER_BEGIN(PascalGO)
 			System.out.println("Todo ha ido bien");
 			}catch(ParseException error){
 			  int[][] expectedTokens = error.expectedTokenSequences;
+			  System.out.println("Error en "+PascalGO.token.beginLine+","+PascalGO.token.beginColumn);
 			  System.out.print("Se esperaba: ");
 			  for (int i = 0; i < expectedTokens.length; i++) {			    
 			  	for (int j = 0; j < expectedTokens[i].length; j++) {
-				        System.out.print(tokenImage[expectedTokens[i][j]]+' ');
+				        System.out.println(tokenImage[expectedTokens[i][j]]+' ');
 				  }			  }
 			  System.out.println("Y se ha recibido: "+error.currentToken.next.image);
 			  //tree.dump("");			  
@@ -42,7 +50,7 @@ PARSER_END(PascalGO)
 	{}
 	{
 		programaCompleto()
-		{
+		{			
 			return jjtThis ;
 		}
 	}
@@ -56,7 +64,8 @@ PARSER_END(PascalGO)
 	/* Regla 1 */
 	void programa():
 	{}
-	{	 	    <PROGRAM><ID><PUNTOYCOMA>bloque()	 	    
+	{			
+			<PROGRAM><ID><PUNTOYCOMA>bloque()		  
 	}
 	
 	/* Regla 2 */
@@ -75,7 +84,7 @@ PARSER_END(PascalGO)
 	
 	/* Regla 4 */
 	void defCte():
-	{}
+	{ }
 	{	
 		//Revisar que javaCC ofrece pontencial para definir mejor esta expresion 
 		<CONST> unaConst() <PUNTOYCOMA> (unaConst()<PUNTOYCOMA>)*
@@ -84,9 +93,14 @@ PARSER_END(PascalGO)
 	/* Regla 5 */
 	void unaConst():
 	{
-	  }
+		Token constName;
+		//integerConstant constant = new integerConstant("",0,'');
+	}
 	{
-		<ID> <IGUAL> constante()
+		constName = <ID> <IGUAL> constante()
+		{
+			
+		}
 	}
 	
 	/* Regla 6 */
