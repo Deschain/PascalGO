@@ -11,8 +11,10 @@ PARSER_BEGIN(PascalGO)
 	
 	/* Imports */	
 		
-	import pascalGO.table.SymbolTable;	
-	import pascalGO.types.*;	
+	import com.sun.org.apache.xalan.internal.xsltc.runtime.BasisLibrary;
+
+import pascalGO.table.SymbolTable;	
+import pascalGO.types.*;	
 
 	public class PascalGO 
 	{
@@ -22,22 +24,22 @@ PARSER_BEGIN(PascalGO)
 		{
 		
 		  SimpleNode tree = null;
-			try			{			PascalGO analizador = new PascalGO(System.in);			
-			//Llamar al metodo que reconoce la primera expresion del sintactico
-			tree = analizador.start();
-			tree.dump("");
-			//Mensajes de salida como exito
-			System.out.println("Todo ha ido bien");
-			}catch(ParseException error){
-			  int[][] expectedTokens = error.expectedTokenSequences;
-			  System.out.println("Error en "+PascalGO.token.beginLine+","+PascalGO.token.beginColumn);
-			  System.out.print("Se esperaba: ");
-			  for (int i = 0; i < expectedTokens.length; i++) {			    
-			  	for (int j = 0; j < expectedTokens[i].length; j++) {
-				        System.out.println(tokenImage[expectedTokens[i][j]]+' ');
-				  }			  }
-			  System.out.println("Y se ha recibido: "+error.currentToken.next.image);
-			  //tree.dump("");			  
+			try{				PascalGO analizador = new PascalGO(System.in);			
+				//Llamar al metodo que reconoce la primera expresion del sintactico
+				tree = analizador.start();
+				tree.dump("");
+				//Mensajes de salida como exito
+				System.out.println("Todo ha ido bien");		
+			}catch(ParseException error){				
+				  int[][] expectedTokens = error.expectedTokenSequences;
+				  System.out.println("Error en "+PascalGO.token.beginLine+","+PascalGO.token.beginColumn);
+				  System.out.print("Se esperaba: ");
+				  for (int i = 0; i < expectedTokens.length; i++) {			    
+				  	for (int j = 0; j < expectedTokens[i].length; j++) {
+					        System.out.println(tokenImage[expectedTokens[i][j]]+' ');
+					  }				  }
+				  System.out.println("Y se ha recibido: "+error.currentToken.next.image);
+				  //tree.dump("");			   			  
 			}catch(Exception error){
 			  			}			
 		}
@@ -58,15 +60,16 @@ PARSER_END(PascalGO)
 	void programaCompleto():
 	{ }
 	{
-		programa() <PUNTO>
+		programa()<PUNTO>
 	}
 	
 	/* Regla 1 */
 	void programa():
 	{}
-	{			
-			<PROGRAM><ID><PUNTOYCOMA>bloque()		  
+	{		
+		<PROGRAM><ID><PUNTOYCOMA>bloque()		
 	}
+	
 	
 	/* Regla 2 */
 	void bloque():
@@ -93,13 +96,13 @@ PARSER_END(PascalGO)
 	/* Regla 5 */
 	void unaConst():
 	{
-		Token constName;
+		Token constName;		
 		//integerConstant constant = new integerConstant("",0,'');
 	}
 	{
 		constName = <ID> <IGUAL> constante()
 		{
-			
+			System.out.println("Definicion de la constante "+constName.image+" con valor ");
 		}
 	}
 	
@@ -301,7 +304,7 @@ PARSER_END(PascalGO)
 	{}
 	{
 			<ID>
-		|	<CTE>
+		|	<CTE>	
 	}
 	
 	/* Regla 42 */
