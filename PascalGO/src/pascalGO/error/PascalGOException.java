@@ -15,6 +15,6 @@ public class PascalGOException extends ParseException{
 		// TODO Auto-generated constructor stub
 	}
 	public PascalGOException(String ex){
-		super(ex +" at "+PascalGO.token.beginLine+"," +PascalGO.token.beginColumn );
+		super(ex +" at "+PascalGO.token.beginLine+"," +PascalGO.token.beginColumn );		
 	}
 }
