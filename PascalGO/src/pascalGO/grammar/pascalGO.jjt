@@ -11,8 +11,7 @@ PARSER_BEGIN(PascalGO)
 	
 	/* Imports */	
 		
-	import com.sun.org.apache.xalan.internal.xsltc.runtime.BasisLibrary;
-
+import java.util.ArrayList;
 import pascalGO.table.SymbolTable;	
 import pascalGO.types.*;	
 
@@ -43,6 +42,25 @@ import pascalGO.types.*;
 			}catch(Exception error){
 			  			}			
 		}
+
+		/**public  static void duplicateIDCheck (Token id)		{
+		  	BasicType aux = null;
+		  	if ((aux= symbolTable.totalSearch(id.image)) == null)
+		  	{
+		  		symbolTable.add(new Constant(id));
+		  	}
+		  	else
+		  	{  
+		  		System.out.println("Error [" + id.beginLine + "," + id.beginColumn + "]: Symbol <" + id.image + "> already exists");
+		  	} 			}*/
+
+		public static boolean typeExistsCheck (String type)		{
+		  	return false;		}
+
+		public static boolean idExistsCheck (String id)		{
+		  	return false;		}
+
+		
 	}
 PARSER_END(PascalGO)
 
@@ -65,7 +83,8 @@ PARSER_END(PascalGO)
 	
 	/* Regla 1 */
 	void programa():
-	{}
+	{
+	}
 	{		
 		<PROGRAM><ID><PUNTOYCOMA>bloque()		
 	}
@@ -90,7 +109,7 @@ PARSER_END(PascalGO)
 	{ }
 	{	
 		//Revisar que javaCC ofrece pontencial para definir mejor esta expresion 
-		<CONST> unaConst() <PUNTOYCOMA> (unaConst()<PUNTOYCOMA>)*
+		<CONST> (unaConst()<PUNTOYCOMA>)+
 	}
 	
 	/* Regla 5 */
@@ -102,7 +121,7 @@ PARSER_END(PascalGO)
 	{
 		constName = <ID> <IGUAL> constante()
 		{
-			System.out.println("Definicion de la constante "+constName.image+" con valor ");
+		  	symbolTable.add(new Constant(constName));
 		}
 	}
 	
@@ -114,10 +133,17 @@ PARSER_END(PascalGO)
 	}
 	
 	/* Regla 7 */
+	//TODO COmprobar si podemos a–adir el lookahead para evitar tener que crear el tipo Type, ya que tiene 2 posibilidades
+	//Que sea un array o un record, es posible que nos interese guardar cada uno como es, peor la comprobacion de la existencia
+	//previa del identificador se hace aqui.
 	void untipo():
-	{}
 	{
-		<ID> tipoEstr()
+		Token tipoName;
+	}
+	{
+		tipoName = <ID> tipoEstr()
+		{
+		  	symbolTable.add(new Type(tipoName));		}
 	}
 	
 	/* Regla 8 */
@@ -138,9 +164,16 @@ PARSER_END(PascalGO)
 	
 	/* Regla 11 */
 	void estrReg():
-	{}
 	{
-		<RECORD> listaVar() (listaVar() <PUNTOYCOMA>)* <END>
+		ArrayList <ListVar> lists = new ArrayList <ListVar >();
+		ListVar aux;
+	}
+	{
+		<RECORD> aux = listaVar()		{
+		    lists.add(aux);		}
+		(<PUNTOYCOMA> aux = listaVar()		{
+		    lists.add(aux);		}
+		)* <END>
 	}
 	
 	/* Regla 12 */
@@ -152,30 +185,62 @@ PARSER_END(PascalGO)
 	
 	/* Regla 13 */
 	void defSubpr():
-	{}
 	{
-		<PROCEDURE> <ID> [ <PARENTESISIZ> parFormales()<DOSPUNTOS> <PARENTESISDE> ] <PUNTOYCOMA> bloque() <PUNTOYCOMA>
+		Token procName;
+		ArrayList <ListVar>  params = new ArrayList <ListVar>();
+	}
+	{
+		<PROCEDURE> procName = <ID> [ <PARENTESISIZ> params = parFormales() <PARENTESISDE> ] <PUNTOYCOMA> bloque() <PUNTOYCOMA>
+		{
+			symbolTable.add(new Procedure (procName,params));
+		}
 	}
 	
 	/* Regla 14 */
-	void parFormales():
-	{}
+	ArrayList <ListVar> parFormales():
 	{
-		listaParam() (<PUNTOYCOMA> listaParam())*
+		ArrayList <ListVar> lists = new ArrayList <ListVar >();
+		ListVar aux;
+	}
+	{
+		aux = listaParam()
+		{
+		    lists.add(aux);		}
+		(<PUNTOYCOMA> aux= listaParam()		{
+		    lists.add(aux);		})*
+		{
+		    return lists;		}
 	}
 	
 	/* Regla 15 */
-	void listaParam():
-	{}
+	ListVar listaParam():
 	{
-		(<VAR>)* listaVar()
+		ListVar list;
+		Token access = null;
+	}
+	{
+		[access = <VAR>] list = listaVar()
+		{
+		    if (access != null)		    {
+		    	list.setAccess(true);		    }
+		    return list;		}
 	}
 	
 	/* Regla 16 */
-	void listaVar():
-	{}
+	ListVar listaVar():
 	{
-		<ID> (<COMA><ID>)* <DOSPUNTOS> <ID>
+		ListVar list = new ListVar();
+		Token aux;
+	}
+	{
+		aux = <ID>		{
+			list.add (aux);		} (<COMA> aux = <ID>		{
+		    list.add (aux);		}
+		)* <DOSPUNTOS> aux = <ID>
+		{
+		    list.setType(aux);
+		    return list;		}
+		
 	}
 	
 	/* Regla 17 */
@@ -204,9 +269,13 @@ PARSER_END(PascalGO)
 	
 	/* Regla 23 */
 	void asignLlamada():
-	{}
 	{
-		<ID> restoAsignLlam()
+		Token llamName;
+	}
+	{
+		llamName = <ID> restoAsignLlam()
+		{
+		  	//symbolTable.check(llamName);		}
 	}
 	
 	/* Regla 24 */

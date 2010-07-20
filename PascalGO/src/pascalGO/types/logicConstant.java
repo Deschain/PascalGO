@@ -1,11 +1,13 @@
 package pascalGO.types;
 
+import pascalGO.grammar.Token;
+
 public class logicConstant extends BasicType{
 
 	private boolean value;
 	
-	public logicConstant(String name, boolean value){
-		super.setName(name);
+	public logicConstant(Token token, boolean value){
+		super(token);
 		this.value = value;
 	}
 
