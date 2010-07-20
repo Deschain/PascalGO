@@ -3,7 +3,7 @@ package pascalGO.table;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
-import pascalGO.types.BasicType;
+import pascalGO.types.*;
 
 public class SymbolTable{
 
@@ -49,11 +49,43 @@ public class SymbolTable{
 		return null;
 	}
 	
-	public void insertName(BasicType name) {
+	public void add(BasicType name) {
 		// TODO Auto-generated method stub
 		//Que busque antes de insertar y si encunetra algo igual que lance excepcion
-		levels.get(actualLevel).put(name.getName(), name);
+		if (check(name))
+			levels.get(actualLevel).put(name.getName(), name);
+		else{
+			
+		}
+	}
+	
+	public boolean check(BasicType t){
+		if (t instanceof ArrayType){
+			
+		}
+		if (t instanceof Constant){
+			
+		}
+		if (t instanceof Variable){
+			
+		}
+		if (t instanceof Type){
+			return checkType ((Type) t);
+		}
+		return false;
+	}
+	
+	public boolean checkType (Type t){
+		if (totalSearch(t.getName()) != null)
+			return true;
+		else
+			return false;
+	}
+	
+	
+	public boolean checkProcedure(Procedure p){
 		
+		return true;
 	}
 		
 }

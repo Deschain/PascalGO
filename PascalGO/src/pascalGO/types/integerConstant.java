@@ -1,12 +1,14 @@
 package pascalGO.types;
 
+import pascalGO.grammar.Token;
+
 public class integerConstant extends BasicType{
 	
 	private int value;
 	private char signo;
 	
-	public integerConstant(String name, int value, char signo){
-		super.setName(name);
+	public integerConstant(Token token, int value, char signo){
+		super(token);
 		this.value = value;
 		this.signo = signo;
 	}

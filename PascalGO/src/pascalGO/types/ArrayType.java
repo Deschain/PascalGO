@@ -1,13 +1,15 @@
 package pascalGO.types;
 
+import pascalGO.grammar.Token;
+
 public class ArrayType extends BasicType {
 
 	private int rangoInferior = 0;
 	private int rangoSuperior = 0;
 	private String type;
 		
-	public ArrayType(String name, int inf, int sup, String type){
-		super.setName(name);
+	public ArrayType(Token token, int inf, int sup, String type){
+		super(token);
 		this.rangoInferior = inf;
 		this.rangoSuperior = sup;
 		this.type = type;
