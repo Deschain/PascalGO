@@ -1,0 +1,500 @@
+/* Seccion de opctiones */
+options{
+	IGNORE_CASE = true;
+	VISITOR = true;
+	MULTI = true;
+	NODE_DEFAULT_VOID = true;
+	NODE_PREFIX = "Node";	
+}
+
+/* Seccion de ejecucion */
+PARSER_BEGIN(PascalGO)
+
+	package pascalGO.grammar;
+	
+	/* Imports */		
+	import pascalGO.table.*;		
+
+	public class PascalGO 
+	{
+		private static SymbolTable symbolTable = new SymbolTable();	
+		
+		public static void main (String[] argum) throws ParseException
+		{
+		
+		  SimpleNode tree = null;
+			try{				PascalGO analizador = new PascalGO(System.in);			
+				//Llamar al metodo que reconoce la primera expresion del sintactico
+				tree = analizador.start();
+				IntermediateCodeGenerator visitor = new IntermediateCodeGenerator();
+				//visitor.visit(tree,null);
+				tree.dump("");
+				//Mensajes de salida como exito
+				//System.out.println("Todo ha ido bien");		
+			}catch(ParseException error){				
+				  int[][] expectedTokens = error.expectedTokenSequences;
+				  System.out.println("Error en "+PascalGO.token.beginLine+","+PascalGO.token.beginColumn);
+				  System.out.print("Se esperaba: ");
+				  for (int i = 0; i < expectedTokens.length; i++) {			    
+				  	for (int j = 0; j < expectedTokens[i].length; j++) {
+					        System.out.println(tokenImage[expectedTokens[i][j]]+' ');
+					  }				  }
+				  System.out.println("Y se ha recibido: "+error.currentToken.next.image);
+				  //tree.dump("");			   			  
+			}catch(Exception error){
+				error.printStackTrace();			}			
+		}
+	}
+PARSER_END(PascalGO)
+
+/* Seccion de sintaxis */
+	
+	SimpleNode start() #Programa:
+	{}
+	{
+		programaCompleto()
+		{			
+			return jjtThis ;
+		}
+	}
+	
+	void programaCompleto():
+	{ }
+	{
+		programa()<PUNTO>
+	}
+	
+	/* Regla 1 */
+	void programa():
+	{}
+	{		
+		<PROGRAM><ID><PUNTOYCOMA>bloque()		
+	}
+	
+	
+	/* Regla 2 */
+	void bloque():
+	{}
+	{
+		declaracion()grupoSent()
+	}
+	
+	/* Regla 3 */
+	void declaracion():
+	{}
+	{
+		[defCte()][defTip()][defVar()](defSubpr())*
+	}
+	
+	/* Regla 4 */
+	void defCte():
+	{ }
+	{	
+		<CONST> (unaConst()<PUNTOYCOMA>)+
+	}
+	
+	/* Regla 5 */
+	void unaConst():
+	{}
+	{
+		<ID> <IGUAL> constante()		
+	}
+	
+	/* Regla 6 */
+	void defTip():
+	{}
+	{
+		<TYPE> (untipo()<PUNTOYCOMA>)+
+	}
+	
+	/* Regla 7 */
+	void untipo():
+	{}
+	{
+		<ID> tipoEstr()
+	}
+	
+	/* Regla 8 */
+	void tipoEstr():
+	{}
+	{
+			estrTab()
+	/* Regla 9 */
+		|	estrReg()
+	}
+	
+	/* Regla 10 */
+	void estrTab():
+	{}
+	{
+		<ARRAY> <CORCHETEIZ> constante() <RANGO> constante() <CORCHETEDE> <OF> <ID>
+	}
+	
+	/* Regla 11 */
+	void estrReg():
+	{}
+	{
+		<RECORD> listaVar() (listaVar() <PUNTOYCOMA>)* <END>
+	}
+	
+	/* Regla 12 */
+	void defVar():
+	{}
+	{
+		<VAR> (listaVar()<PUNTOYCOMA>)+
+	}
+	
+	/* Regla 13 */
+	void defSubpr() #Procedure:
+	{}
+	{
+		<PROCEDURE> <ID> [ <PARENTESISIZ> parFormales()<DOSPUNTOS> <PARENTESISDE> ] <PUNTOYCOMA> bloque() <PUNTOYCOMA>
+	}
+	
+	/* Regla 14 */
+	void parFormales():
+	{}
+	{
+		listaParam() (<PUNTOYCOMA> listaParam())*
+	}
+	
+	/* Regla 15 */
+	void listaParam():
+	{}
+	{
+		[<VAR>] listaVar()
+	}
+	
+	/* Regla 16 */
+	void listaVar():
+	{}
+	{
+		<ID> (<COMA><ID>)* <DOSPUNTOS> <ID>
+	}
+	
+	/* Regla 17 */
+	void grupoSent():
+	{}
+	{
+		<BEGIN> sentencia() (<PUNTOYCOMA> sentencia())* <END>
+	}
+	
+	/* Regla 18 */
+	void sentencia():
+	{}
+	{
+		[
+			asignLlamada() 	
+	/* Regla 19 */
+		|	condicional() 	
+	/* Regla 20 */
+		|	ciclica()
+	/* Regla 21 */
+		|	grupoSent()
+	/* Regla 22 */
+		]
+
+	}
+	
+	/* Regla 23 */
+	void asignLlamada() #Asignement:
+	{}
+	{
+		identifier() restoAsignLlam()
+	}
+	
+	/* Regla 24 */
+	void restoAsignLlam():
+	{}
+	{
+		[
+				<ASIGNACION> expresion()
+	/* Regla 25 */
+			|	<PARENTESISIZ> parLlamada() <PARENTESISDE>
+		]
+	/* Regla 26 */
+	}
+	
+	/* Regla 27 */
+	void condicional() #Conditional:
+	{}
+	{
+		<IF> expresion() <THEN> sentencia() [<ELSE> sentencia()]
+	}
+	
+	/* Regla 28 */
+	void ciclica() #Loop:
+	{}
+	{
+		<WHILE> expresion() <DO> sentencia()
+	}
+	
+	/* Regla 29 */
+	void parLlamada():
+	{}
+	{
+		expresion() ( <COMA> expresion() )*
+	}
+	
+	/* Regla 30 */
+	void expresion():
+	{}
+	{ 
+		exprSimple() 
+		[ 
+		  opRel() exprSimple()
+		  {
+			  Node exp1,op,exp2;
+			  exp2 = jjtree.popNode();
+			  op   = jjtree.popNode();
+			  exp1 = jjtree.popNode();
+			  op.jjtAddChild(exp1,0);
+			  op.jjtAddChild(exp2,1);
+			  jjtree.pushNode(op);
+		  }
+		] 
+	}
+	
+	/* Regla 31 */
+	void exprSimple():
+	{
+		Node unaryOp = null;
+	}
+	{
+		[signo() {unaryOp = jjtree.popNode();}] 
+		termino()
+		{
+			if(unaryOp != null){
+				unaryOp.jjtAddChild(jjtree.popNode(),0);
+				jjtree.pushNode(unaryOp);
+			}
+		}
+		( 
+			opAdt() termino()
+			{
+				  Node term1,op,term2;
+				  term2 = jjtree.popNode();
+				  op    = jjtree.popNode();
+				  term1 = jjtree.popNode();
+				  op.jjtAddChild(term1,0);
+				  op.jjtAddChild(term2,1);
+				  jjtree.pushNode(op);
+			}
+		)*
+	}
+	
+	/* Regla 32 */
+	void termino():
+	{}
+	{
+		factor() 
+		( 
+			opMul() factor()
+			{
+				  Node fac1,op,fac2;
+				  fac2 = jjtree.popNode();
+				  op    = jjtree.popNode();
+				  fac1 = jjtree.popNode();
+				  op.jjtAddChild(fac1,0);
+				  op.jjtAddChild(fac2,1);
+				  jjtree.pushNode(op);
+			}
+		)*
+	}
+	
+	/* Regla 33 */
+	void factor():
+	{
+		Token t;		
+	}
+	{
+			t = <CTE> 
+			{jjtThis.jjtSetValue(t.image);}
+			#Constant		
+	/* Regla 34 */
+		|	identifier()
+	/* Regla 35 */	
+		| 	<NOT> 
+			factor()			
+			#Negacion
+	/* Regla 36 */
+		|	<PARENTESISIZ> expresion() <PARENTESISDE>
+	}
+	
+	/* Regla ajena a la gramatica para tratar identificadores de tipos complejos */
+	void identifier() #Identifier:
+	{
+		Token t;
+		Node selector, aux;
+	}
+	{
+		t = <ID>
+		{
+			jjtThis.jjtSetValue(t.image);
+			aux = jjtThis;			
+		}
+		(
+			selector()
+			{
+				selector = jjtree.popNode();
+				aux.jjtAddChild(selector,0);
+				aux = selector;
+			}
+		)*
+	}
+
+	/* Regla 38 */
+	void selector() #Selector:
+	{
+		Token t; 
+	}
+	{
+			<CORCHETEIZ> 
+			expresion()
+			{jjtThis.jjtSetValue(jjtree.popNode());}
+			<CORCHETEDE>			
+	/* Regla 39 */
+		|	<PUNTO>  t = <ID>
+			{jjtThis.jjtSetValue(t.image);}
+	}
+	
+	/* Regla 40 */
+	void constante() #Constant:
+	{}
+	{
+		[ signo() ] cteSinSigno()
+		
+	}
+	
+	/* Regla 41 */
+	void  cteSinSigno():
+	{}
+	{
+			<ID> 
+		|	<CTE>
+	}
+	
+	/* Regla 42 */
+	void opRel() #opRel:
+	{}
+	{
+			<MAYOR> 	{jjtThis.value = ">";}
+		|	<MAYORIG>	{jjtThis.value = ">=";}
+		|	<MENOR>		{jjtThis.value = "<";}
+		|	<MENORIG>	{jjtThis.value = "<=";}
+		|	<IGUAL>		{jjtThis.value = "=";}
+		|	<DESIGUAL>	{jjtThis.value = "<>";}
+	}
+	
+	/* Regla 43 */
+	void opAdt() #opAdt:
+	{		
+	}
+	{	
+			<SUMA>  {jjtThis.value = "+";}
+		| 	<RESTA> {jjtThis.value = "-";}
+		| 	<OR> 	{jjtThis.value = "OR";}	
+	}
+	
+	/* Regla 44 */
+	void opMul() #opMul:
+	{}
+	{
+			<MULT> 	{jjtThis.value = "*";}
+		|	<DIV>	{jjtThis.value = "div";}
+		|	<MOD>	{jjtThis.value = "mod";}
+		|	<AND>	{jjtThis.value = "and";}
+	}
+	
+	/* Regla 45 */
+	void signo() #Signo:
+	{}
+	{
+			<SUMA>	{jjtThis.value = "+";}
+		|	<RESTA>	{jjtThis.value = "-";}
+	}
+	
+/* Seccion de lexico */
+	/* Faltan por identificar los comentarios, y un repaso a los tokens que utilizan ER */
+
+/* Caracteres que se omiten */
+	SKIP:{
+	  " "
+	  | "\r"
+	  | "\t"
+	  | "\n"
+	}
+
+/* Palabras reservadas */
+	TOKEN:{
+			<AND: 	"and">
+		|	<ARRAY: "array">
+		|	<BEGIN:	"begin">
+		|	<CONST: "const">
+		|	<DIV:	"div">
+		|	<DO:	"do">
+		|	<ELSE:	"else">
+		|	<END:	"end"> 
+		|	<IF:	"if">
+		|	<MOD:	"mod">
+		|	<NOT:	"not">
+		|	<OF:	"of">
+		|	<OR:	"or">
+		|	<PROCEDURE:	"procedure">
+		|	<PROGRAM:	"program">
+		|	<RECORD:	"record">
+		|	<THEN:	"then">
+		|	<TYPE:	"type">	
+		|	<VAR:	"var">
+		|	<WHILE:	"while">
+	}
+
+/* Operadores aritmeticos */
+	TOKEN:{
+	  	<SUMA:	"+">
+	  |	<RESTA:	"-">
+	  |	<MULT:	"*">
+	}
+
+/* Operadores relacionales */
+	TOKEN:{
+	 	<MAYOR:		">">
+	 |	<MAYORIG:	">=">
+	 |	<MENOR:		"<">
+	 |	<MENORIG:	"<=">
+	 |	<IGUAL:		"=">
+	 |	<DESIGUAL:	"<>">
+	}
+
+/* Asignacion */
+	TOKEN:{
+	  <ASIGNACION:	":=">
+	}
+
+/* Signos de puntuacion */
+	TOKEN:{
+	  	<PARENTESISIZ:	"(">
+	  |	<PARENTESISDE:	")">
+	  |	<CORCHETEIZ:	"[">
+	  |	<CORCHETEDE:	"]">
+	  |	<COMA:			",">
+	  |	<PUNTOYCOMA:	";">
+	  |	<PUNTO:			".">
+	  |	<DOSPUNTOS:		":">
+	}
+
+
+/* Rango */
+	TOKEN:{
+	  <RANGO:		"..">
+	}
+	
+/* Identificador */
+	TOKEN:{
+  		<ID: ["a"-"z"](["a"-"z","0"-"9"])*>
+	}
+	
+/* Constante */
+	TOKEN:{
+			<CTE: ["1"-"9" ,"0"](["0"-"9"])* >
+	}
