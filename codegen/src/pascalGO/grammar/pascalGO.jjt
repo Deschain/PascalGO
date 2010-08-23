@@ -27,8 +27,8 @@ PARSER_BEGIN(PascalGO)
 				//Llamar al metodo que reconoce la primera expresion del sintactico
 				tree = analizador.start();
 				IntermediateCodeGenerator visitor = new IntermediateCodeGenerator();
-				//visitor.visit(tree,null);
-				tree.dump("");
+				visitor.visit(tree,null);
+				//tree.dump("");
 				//Mensajes de salida como exito
 				//System.out.println("Todo ha ido bien");		
 			}catch(ParseException error){				
