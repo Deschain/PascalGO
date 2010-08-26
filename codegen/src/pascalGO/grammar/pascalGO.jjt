@@ -28,6 +28,7 @@ PARSER_BEGIN(PascalGO)
 				tree = analizador.start();
 				IntermediateCodeGenerator visitor = new IntermediateCodeGenerator();
 				visitor.visit(tree,null);
+				System.out.println();
 				//tree.dump("");
 				//Mensajes de salida como exito
 				//System.out.println("Todo ha ido bien");		
@@ -173,7 +174,7 @@ PARSER_END(PascalGO)
 	}
 	
 	/* Regla 17 */
-	void grupoSent():
+	void grupoSent()#Block:
 	{}
 	{
 		<BEGIN> sentencia() (<PUNTOYCOMA> sentencia())* <END>
@@ -219,7 +220,7 @@ PARSER_END(PascalGO)
 	void condicional() #Conditional:
 	{}
 	{
-		<IF> expresion() <THEN> sentencia() [<ELSE> sentencia()]
+		<IF> expresion() <THEN> sentencia() [ LOOKAHEAD(2) <ELSE> sentencia()]
 	}
 	
 	/* Regla 28 */
@@ -314,9 +315,8 @@ PARSER_END(PascalGO)
 	/* Regla 34 */
 		|	identifier()
 	/* Regla 35 */	
-		| 	<NOT> 
+		| 	<NOT> 			
 			factor()			
-			#Negacion
 	/* Regla 36 */
 		|	<PARENTESISIZ> expresion() <PARENTESISDE>
 	}
