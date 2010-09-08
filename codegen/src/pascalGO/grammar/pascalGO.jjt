@@ -423,6 +423,8 @@ PARSER_END(PascalGO)
 	  | "\r"
 	  | "\t"
 	  | "\n"
+	  | <MULTI_LINE_COMMENT:"{"(~["}"])*"}">
+	  | <MULTI:"(""*"(~["*"])*"*"")">
 	}
 
 /* Palabras reservadas */
