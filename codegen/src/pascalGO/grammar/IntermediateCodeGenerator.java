@@ -79,9 +79,10 @@ public class IntermediateCodeGenerator implements PascalGOVisitor {
 	public Object visit(NodeConditional node, Object data) {
 		String result;
 		String label = getIfLabel();
-		result = "(BCN,"+label+")";
+		result = "(BCN";
 		int numChilds = node.jjtGetNumChildren();
-		node.jjtGetChild(0).jjtAccept(this, null);
+		result += ","+node.jjtGetChild(0).jjtAccept(this, null);
+		result += ","+label+")";
 		printResult(result);
 		if(numChilds == 2){
 			node.jjtGetChild(1).jjtAccept(this, null);
