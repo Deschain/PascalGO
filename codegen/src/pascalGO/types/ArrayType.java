@@ -1,18 +1,37 @@
 package pascalGO.types;
 
-import pascalGO.grammar.Token;
-
 public class ArrayType extends BasicType {
 
+	private String name;
 	private int rangoInferior = 0;
 	private int rangoSuperior = 0;
-	private String type;
+	
+	public ArrayType(String name) {
+		super();
+		this.name = name;
+	}
+	
+	public ArrayType(String name, String type, int rangoInferior, int rangoSuperior){
+		super(type);
+		this.name = name;
+		this.rangoInferior = rangoInferior;
+		this.rangoSuperior = rangoSuperior;
+	}
+	
+	public boolean checkRange(){		
+		if(rangoSuperior<rangoInferior){
+			return false;
+		}else{
+			return true;
+		}
+	}
 
-	public ArrayType(Token token, int inf, int sup, String type) {
-		super(token);
-		this.rangoInferior = inf;
-		this.rangoSuperior = sup;
-		this.type = type;
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	public int getRangoInferior() {
@@ -30,13 +49,5 @@ public class ArrayType extends BasicType {
 	public void setRangoSuperior(int rangoSuperior) {
 		this.rangoSuperior = rangoSuperior;
 	}
-
-	public String getType() {
-		return type;
-	}
-
-	public void setType(String type) {
-		this.type = type;
-	}
-
+	
 }

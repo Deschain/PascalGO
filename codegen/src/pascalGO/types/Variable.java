@@ -1,28 +1,34 @@
 package pascalGO.types;
 
-import pascalGO.grammar.Token;
-
 public class Variable extends BasicType {
 
-	private Type type;
+	private String name;
 	private String access;
 
-	public Variable(Token token, Type type, boolean access) {
-		super(token);
-		this.type = type;
-		if (access) {
-			this.access = new String("dir");
-		} else {
-			this.access = new String("ref");
-		}
+	public Variable (String name){
+		super();
+		this.name = name;
+		this.access = null;
+	}
+	
+	public Variable(String name, String type){
+		super(type);
+		this.name = name;
+		this.access = null;
+	}
+	
+	public Variable(String name, String type, String access){
+		super(type);
+		this.name = name;
+		this.access = access;
 	}
 
-	public Type getType() {
-		return type;
+	public String getName() {
+		return name;
 	}
 
-	public void setType(Type type) {
-		this.type = type;
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	public String getAccess() {
@@ -32,13 +38,5 @@ public class Variable extends BasicType {
 	public void setAccess(String access) {
 		this.access = access;
 	}
-
-	public void setAccess(boolean access) {
-		if (access) {
-			this.access = new String("dir");
-		} else {
-			this.access = new String("ref");
-		}
-	}
-
+	
 }

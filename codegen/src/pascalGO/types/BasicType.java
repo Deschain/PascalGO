@@ -1,25 +1,34 @@
 package pascalGO.types;
 
-import pascalGO.grammar.Token;
+public class BasicType {
 
-public abstract class BasicType {
-
-	protected Token token;
-
-	public Token getToken() {
-		return token;
+	private String name;
+	private boolean used = false;
+	
+	public BasicType(){
+		name = null;	
+		this.used = false;
 	}
-
-	public void setName(Token token) {
-		this.token = token;
+	
+	public BasicType(String name){
+		this.name = name;
+		this.used = false;
 	}
-
-	public BasicType(Token token) {
-		this.token = token;
+	
+	public String getType(){
+		return this.name;
 	}
-
-	public String getName() {
-		return token.image;
+	
+	public void setType(String name){
+		this.name = name;
+	}
+	
+	public void use(){
+		this.used = true;
+	}
+	
+	public boolean isUsed(){
+		return this.used;
 	}
 
 }

@@ -1,33 +1,35 @@
 package pascalGO.types;
 
-import java.util.ArrayList;
+import java.util.Hashtable;
 
-import pascalGO.grammar.Token;
+public class Procedure extends BasicType{
 
-public class Procedure extends BasicType {
-
-	ArrayList<ListVar> parameters = null;
-
-	public Procedure(Token token) {
-		super(token);
-		parameters = new ArrayList<ListVar>();
+	private String name;
+	private Hashtable<String, Variable> parameters;
+	
+	public Procedure (String name){
+		super();
+		this.name = name;
+		parameters = new Hashtable<String, Variable>();
+	}
+	
+	public String getName() {
+		return name;
 	}
 
-	public Procedure(Token token, ArrayList<ListVar> parameters) {
-		super(token);
-		this.parameters = parameters;
+	public void setName(String name) {
+		this.name = name;
 	}
 
-	public void setParameters(ArrayList<ListVar> parameters) {
-		this.parameters = parameters;
+	public void addVariable(Variable parameter){
+		parameters.put(parameter.getName(), parameter);
 	}
-
-	public ArrayList<ListVar> getParameters() {
-		return parameters;
+	
+	public Variable getVariable(String name){
+		return parameters.get(name);
 	}
-
-	public void add(ListVar list) {
-		parameters.add(list);
+	
+	public Variable getVariable(int index){
+		return (Variable) parameters.values().toArray()[index];
 	}
-
 }

@@ -1,11 +1,29 @@
 package pascalGO.types;
 
-import pascalGO.grammar.Token;
-
 public class Constant extends BasicType {
 
-	public Constant(Token token) {
-		super(token);
+	private String name;
+	private String value;
+	
+	public Constant(String name, String value){
+		this.name = value;
+		this.value = value;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getValue() {
+		return value;
+	}
+
+	public void setValue(String value) {
+		this.value = value;
 	}
 
 }
