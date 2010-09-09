@@ -102,8 +102,9 @@ public class IntermediateCodeGenerator implements PascalGOVisitor {
 		String startLabel = getWhileLabel();
 		String endLabel = getWhileLabel();
 		System.out.println(startLabel);
-		result = "(BCN,"+endLabel+")";		
-		node.jjtGetChild(0).jjtAccept(this, null);		
+		result = "(BCN";
+		result += ","+node.jjtGetChild(0).jjtAccept(this, null);
+		result += ","+endLabel+")";						
 		printResult(result);		
 		for(int i=1; i<node.jjtGetNumChildren();i++){
 			node.jjtGetChild(i).jjtAccept(this, null);
