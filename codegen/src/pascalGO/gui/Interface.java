@@ -1,27 +1,22 @@
 package pascalGO.gui;
 
 import java.awt.BorderLayout;
-import javax.swing.JPanel;
-import javax.swing.JFrame;
-import javax.swing.JMenuBar;
-import javax.swing.JMenu;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
-import java.awt.Rectangle;
-import javax.swing.BorderFactory;
-import javax.swing.border.TitledBorder;
-import javax.swing.JScrollPane;
-import java.awt.GridBagConstraints;
-import javax.swing.JTextArea;
-import java.awt.FlowLayout;
-import java.awt.CardLayout;
-import java.awt.Insets;
-import java.awt.Dimension;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import java.awt.Font;
 import java.awt.Color;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.border.TitledBorder;
 
 public class Interface extends JFrame {
 

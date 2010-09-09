@@ -43,49 +43,5 @@ public class SymbolTable {
 		}
 		return totalSearchResult;
 	}
-
-	public Object search() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public void add(BasicType name) {
-		// TODO Auto-generated method stub
-		// Que busque antes de insertar y si encunetra algo igual que lance
-		// excepcion
-		if (check(name))
-			levels.get(actualLevel).put(name.getName(), name);
-		else {
-
-		}
-	}
-
-	public boolean check(BasicType t) {
-		if (t instanceof ArrayType) {
-
-		}
-		if (t instanceof Constant) {
-
-		}
-		if (t instanceof Variable) {
-
-		}
-		if (t instanceof Type) {
-			return checkType((Type) t);
-		}
-		return false;
-	}
-
-	public boolean checkType(Type t) {
-		if (totalSearch(t.getName()) != null)
-			return true;
-		else
-			return false;
-	}
-
-	public boolean checkProcedure(Procedure p) {
-
-		return true;
-	}
-
+	
 }

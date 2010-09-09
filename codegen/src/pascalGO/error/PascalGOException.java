@@ -2,7 +2,6 @@ package pascalGO.error;
 
 import pascalGO.grammar.ParseException;
 import pascalGO.grammar.PascalGO;
-import pascalGO.grammar.Token;
 
 public class PascalGOException extends ParseException {
 

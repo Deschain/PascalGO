@@ -13,14 +13,16 @@ PARSER_BEGIN(PascalGO)
 	package pascalGO.grammar;
 	
 	/* Imports */		
-	import pascalGO.table.*;		
+	import java.util.ArrayList;
+
+	import pascalGO.table.*;
+	import pascalGO.types.*;
 
 	public class PascalGO 
 	{
 		private static SymbolTable symbolTable = new SymbolTable();	
 		
-		public static void main (String[] argum) throws ParseException
-		{
+		public static void main (String[] argum) throws ParseException{
 		
 		  SimpleNode tree = null;
 			try{				PascalGO analizador = new PascalGO(System.in);			
@@ -96,23 +98,36 @@ PARSER_END(PascalGO)
 	
 	/* Regla 5 */
 	void unaConst():
-	{}
 	{
-		<ID> <IGUAL> constante()		
+		Token constName;
+		String constValue;
+	}
+	{
+		constName = <ID> <IGUAL> constValue = constante()
+		{
+			//Constant constant = new Constant(constName);
+			System.out.println("Definicion de la constante "+constName.image+" con valor "+constValue);
+		}
 	}
 	
 	/* Regla 6 */
 	void defTip():
 	{}
 	{
-		<TYPE> (untipo()<PUNTOYCOMA>)+
+		<TYPE> 
+		(untipo()<PUNTOYCOMA>)+
 	}
 	
 	/* Regla 7 */
 	void untipo():
-	{}
 	{
-		<ID> tipoEstr()
+		Token typeName;
+	}
+	{
+		typeName = <ID> <IGUAL> tipoEstr()
+		{
+			//Insert type into the symbol table
+		}
 	}
 	
 	/* Regla 8 */
@@ -126,23 +141,53 @@ PARSER_END(PascalGO)
 	
 	/* Regla 10 */
 	void estrTab():
-	{}
 	{
-		<ARRAY> <CORCHETEIZ> constante() <RANGO> constante() <CORCHETEDE> <OF> <ID>
+		String infRange, supRange;
+		Token arrayType;
+	}
+	{
+		<ARRAY> <CORCHETEIZ> infRange = constante() <RANGO> supRange = constante() <CORCHETEDE> <OF> arrayType = <ID>
+		{
+			System.out.println("Tipo Array, rangoInf "+infRange+", rangoSup "+supRange+", de tipo "+arrayType.image);
+		}
 	}
 	
 	/* Regla 11 */
 	void estrReg():
-	{}
 	{
-		<RECORD> listaVar() (listaVar() <PUNTOYCOMA>)* <END>
+		ArrayList<String> variables = new ArrayList<String>();
+		String type;
+	}
+	{
+		<RECORD> 
+		type = listaVar(variables)
+			{
+				/* Añadir las variables al registro */
+			}
+		(type = listaVar(variables)
+			{
+				/* Añadir las variables al registro */
+			}
+		<PUNTOYCOMA>)* <END>
 	}
 	
 	/* Regla 12 */
 	void defVar():
-	{}
 	{
-		<VAR> (listaVar()<PUNTOYCOMA>)+
+		ArrayList<String> variables = new ArrayList<String>();
+		String type;
+	}
+	{
+		<VAR> 
+		(type = listaVar(variables)
+			{
+				for(int i = 0; i<variables.size();i++){
+					System.out.println("Declarada variable "+variables.get(i)+" del tipo "+type);
+				}
+				variables.clear();
+			}		
+		<PUNTOYCOMA>)+
+		
 	}
 	
 	/* Regla 13 */
@@ -161,16 +206,37 @@ PARSER_END(PascalGO)
 	
 	/* Regla 15 */
 	void listaParam():
-	{}
 	{
-		[<VAR>] listaVar()
+		ArrayList<String> parameters = new ArrayList<String>();
+		String type;
+	}
+	{
+		[<VAR>] type = listaVar(parameters)
+		{
+			/*Añadir los parametros al procedimineto*/
+		}
 	}
 	
 	/* Regla 16 */
-	void listaVar():
-	{}
+	String listaVar(ArrayList<String> variables):
 	{
-		<ID> (<COMA><ID>)* <DOSPUNTOS> <ID>
+		Token t;
+	}
+	{
+		t = <ID>
+		{
+			variables.add(t.image);
+		}
+		(<COMA> 
+		 	t = <ID>
+			{
+				variables.add(t.image);
+			}
+		)* 
+		<DOSPUNTOS> t  = <ID>
+		{
+			return t.image;
+		}
 	}
 	
 	/* Regla 17 */
@@ -359,19 +425,36 @@ PARSER_END(PascalGO)
 	}
 	
 	/* Regla 40 */
-	void constante() #Constant:
-	{}
+	String constante():
 	{
-		[ signo() ] cteSinSigno()
+		String constant;
+		SimpleNode sign;
+	}
+	{
+		[ 
+		  signo()
+		  {
+			  sign = (SimpleNode)jjtree.popNode();		  
+		  }
+		] 
+		constant = cteSinSigno()
+		{
+			return constant;
+		}
 		
 	}
 	
 	/* Regla 41 */
-	void  cteSinSigno():
-	{}
+	/* Constants with out sign, used to define constants and into the array range definition*/
+	String  cteSinSigno():
 	{
-			<ID> 
-		|	<CTE>
+		Token constValue;
+	}
+	{
+		(constValue = <ID> | constValue = <CTE>)
+		{
+			return constValue.image;
+		}
 	}
 	
 	/* Regla 42 */
