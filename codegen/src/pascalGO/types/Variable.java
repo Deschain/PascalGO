@@ -2,33 +2,32 @@ package pascalGO.types;
 
 public class Variable extends BasicType {
 
-	private String name;
+	private String type;
 	private String access;
 
 	public Variable (String name){
-		super();
-		this.name = name;
+		super(name);
 		this.access = null;
 	}
 	
 	public Variable(String name, String type){
-		super(type);
-		this.name = name;
+		super(name);
+		this.type = type;
 		this.access = null;
 	}
 	
 	public Variable(String name, String type, String access){
-		super(type);
-		this.name = name;
+		super(name);
+		this.type = type;
 		this.access = access;
 	}
 
-	public String getName() {
-		return name;
+	public String getType() {
+		return type;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setType(String type) {
+		this.type = type;
 	}
 
 	public String getAccess() {

@@ -14,27 +14,70 @@ PARSER_BEGIN(PascalGO)
 	
 	/* Imports */		
 	import java.util.ArrayList;
+	import java.lang.NumberFormatException;
+	import java.io.*;
 
 	import pascalGO.table.*;
 	import pascalGO.types.*;
+	import pascalGO.error.*;
 
+	//Definition of types
+	
 	public class PascalGO 
 	{
-		private static SymbolTable symbolTable = new SymbolTable();	
+	    
+		private static String INTEGER = "Integer";
+		private static String BOOLEAN = "Boolean";
+	
+		private static SymbolTable symbolTable = new SymbolTable();
+		private static SemanticAnalizer semanticAnalizer = new SemanticAnalizer();
 		
 		public static void main (String[] argum) throws ParseException{
-		
+
+
+			//Code for Input management.
+			java.io.InputStream istream = null;
+			if (argum.length == 0)			{
+			    istream = System.in;			}if (argum.length == 1)			{
+			    try			    {				    istream = new FileInputStream(argum[0]);
+				}catch(FileNotFoundException e)				{
+				System.out.println("Error in execution of pascalGO:");
+				System.out.println(e.getMessage());
+			    System.out.println("Usage:");
+			    System.out.println("	pascalGO");
+			    System.out.println("	pascalGO filename");
+			    return;				}
+			}else			{
+			    System.out.println("Error in execution of pascalGO:");
+			    System.out.println("Usage:");
+			    System.out.println("	pascalGO");
+			    System.out.println("	pascalGO filename");
+			    return;			}
+			
 		  SimpleNode tree = null;
-			try{				PascalGO analizador = new PascalGO(System.in);			
+			try{
+
+				symbolTable.add(new Type("Integer"));
+				symbolTable.add(new Type("Boolean"));
+				symbolTable.add(new Constant("TRUE","1"));
+				symbolTable.add(new Constant("FALSE","0"));
+
+			    				PascalGO analizador = new PascalGO(istream);			
 				//Llamar al metodo que reconoce la primera expresion del sintactico
 				tree = analizador.start();
 				IntermediateCodeGenerator visitor = new IntermediateCodeGenerator();
+
+
+				//Sintactico y sem‡ntico completo y v‡lido.
+	
+				//Genera el c—digo.
 				visitor.visit(tree,null);
 				System.out.println();
 				//tree.dump("");
 				//Mensajes de salida como exito
 				//System.out.println("Todo ha ido bien");		
-			}catch(ParseException error){				
+			}catch(PascalGOException e){
+			    System.out.println(e.toString());			}catch(ParseException error){				
 				  int[][] expectedTokens = error.expectedTokenSequences;
 				  System.out.println("Error en "+PascalGO.token.beginLine+","+PascalGO.token.beginColumn);
 				  System.out.print("Se esperaba: ");
@@ -45,7 +88,8 @@ PARSER_BEGIN(PascalGO)
 				  System.out.println("Y se ha recibido: "+error.currentToken.next.image);
 				  //tree.dump("");			   			  
 			}catch(Exception error){
-				error.printStackTrace();			}			
+				error.printStackTrace();			}
+			return;
 		}
 	}
 PARSER_END(PascalGO)
@@ -65,13 +109,17 @@ PARSER_END(PascalGO)
 	{ }
 	{
 		programa()<PUNTO>
+		{
+		    symbolTable.eraseLevel();		}
 	}
 	
 	/* Regla 1 */
 	void programa():
 	{}
 	{		
-		<PROGRAM><ID><PUNTOYCOMA>bloque()		
+		<PROGRAM><ID><PUNTOYCOMA>
+		{
+		    symbolTable.openLevel();		}bloque()		
 	}
 	
 	
@@ -97,16 +145,36 @@ PARSER_END(PascalGO)
 	}
 	
 	/* Regla 5 */
+	/**
+		This method evaluates the definition of a constant.
+		There can be no elements with the same name
+		The value must either be boolean ("TRUE" or "FALSE"), an integer, or another constant
+	*/
 	void unaConst():
 	{
 		Token constName;
 		String constValue;
+		BasicType bt = null;
 	}
 	{
 		constName = <ID> <IGUAL> constValue = constante()
 		{
-			//Constant constant = new Constant(constName);
-			System.out.println("Definicion de la constante "+constName.image+" con valor "+constValue);
+			//boolean
+			bt = symbolTable.localSearch(constName.image);
+			if (bt == null)			{
+			    try			    {			        Integer.parseInt(constValue);
+			    }
+			    catch(NumberFormatException e)			    {
+			        bt = symbolTable.localSearch(constValue);
+			   		if (bt != null)
+			   		 if (!(bt instanceof Constant))
+			    		throw new PascalGOException(bt.getName() + "is not a valid value for constant");			    }
+				symbolTable.add(new Constant(constName.image,constValue));
+				System.out.println("Constant definition "+constName.image+" with value "+constValue + " added");
+			}
+			else			{
+			    throw new PascalGOException("Definicion de la constante "+constName.image+" erronea, identificador en uso");
+			}
 		}
 	}
 	
@@ -122,69 +190,115 @@ PARSER_END(PascalGO)
 	void untipo():
 	{
 		Token typeName;
+		Type type;
 	}
 	{
-		typeName = <ID> <IGUAL> tipoEstr()
+		typeName = <ID> <IGUAL> type = tipoEstr()
 		{
-			//Insert type into the symbol table
+			type.setName(typeName.image);
+			symbolTable.add(type);
 		}
 	}
 	
 	/* Regla 8 */
-	void tipoEstr():
-	{}
+	Type tipoEstr():
 	{
-			estrTab()
+		Type type;
+	}
+	{
+			type = estrTab()		{
+			    return type;		}
 	/* Regla 9 */
-		|	estrReg()
+		|	type = estrReg()
+		{
+		    return type;		}
 	}
 	
 	/* Regla 10 */
-	void estrTab():
+	Type estrTab():
 	{
 		String infRange, supRange;
 		Token arrayType;
+		ArrayType array = new ArrayType();
 	}
 	{
 		<ARRAY> <CORCHETEIZ> infRange = constante() <RANGO> supRange = constante() <CORCHETEDE> <OF> arrayType = <ID>
 		{
 			System.out.println("Tipo Array, rangoInf "+infRange+", rangoSup "+supRange+", de tipo "+arrayType.image);
+			try			{
+			    array.setRangoInferior(Integer.parseInt(infRange));			}catch(NumberFormatException e)			{
+			    BasicType bt = symbolTable.totalSearch(infRange);
+			    if ((bt != null) && (bt instanceof Constant))			    {
+			        			    }else			    {
+			        throw new PascalGOException(infRange + " is not a valid lower limit for an array");			    }			}
+
+			try
+			{
+			    array.setRangoSuperior(Integer.parseInt(supRange));
+			}catch(NumberFormatException e)
+			{
+			    BasicType bt = symbolTable.totalSearch(supRange);
+			    if ((bt != null) && (bt instanceof Constant))
+			    {
+			        
+			    }else
+			    {
+			        throw new PascalGOException(supRange + " is not a valid upper limit for an array");
+			    }
+			}
+
+			if (array.getRangoSuperior() <= array.getRangoInferior())
+				throw new PascalGOException("[" + array.getRangoInferior() + "," + array.getRangoSuperior() + "] isn't a valid type");
+			
+			if (symbolTable.has(arrayType.image))			{
+				array.setType(arrayType.image);
+			}else			{
+			    throw new PascalGOException(arrayType.image + " isn't a valid type");			}
+			return array;
 		}
 	}
 	
 	/* Regla 11 */
-	void estrReg():
+	Type estrReg():
 	{
-		ArrayList<String> variables = new ArrayList<String>();
-		String type;
+		ArrayList<Variable> variables;
+		RecordType record = new RecordType();
 	}
 	{
 		<RECORD> 
-		type = listaVar(variables)
+		variables =  listaVar()
 			{
+				record.merge(variables);
 				/* Añadir las variables al registro */
 			}
-		(type = listaVar(variables)
+		(variables = listaVar()
 			{
+			    record.merge(variables);
 				/* Añadir las variables al registro */
 			}
-		<PUNTOYCOMA>)* <END>
+		<PUNTOYCOMA>)* <END>		{
+		    return record;		}
 	}
 	
 	/* Regla 12 */
 	void defVar():
 	{
-		ArrayList<String> variables = new ArrayList<String>();
+		ArrayList<Variable> variables;
 		String type;
+		BasicType bt;
 	}
 	{
 		<VAR> 
-		(type = listaVar(variables)
+		(variables = listaVar()
 			{
-				for(int i = 0; i<variables.size();i++){
-					System.out.println("Declarada variable "+variables.get(i)+" del tipo "+type);
+			    //Como comparten el typo, se comprueba una vez;
+				bt = symbolTable.totalSearch(variables.get(0).getType());
+			    if (bt != null && bt instanceof Type )
+				for(Variable var : variables){
+					System.out.println("Declarada variable "+var.getName()+" del tipo "+var.getType());
+					symbolTable.add(var);
 				}
-				variables.clear();
+				
 			}		
 		<PUNTOYCOMA>)+
 		
@@ -192,50 +306,93 @@ PARSER_END(PascalGO)
 	
 	/* Regla 13 */
 	void defSubpr() #Procedure:
-	{}
 	{
-		<PROCEDURE> <ID> [ <PARENTESISIZ> parFormales()<DOSPUNTOS> <PARENTESISDE> ] <PUNTOYCOMA> bloque() <PUNTOYCOMA>
+		Procedure proc;
+		Token t;
+		ArrayList <Variable > vars = null;
+	}
+	{
+	<PROCEDURE> t=<ID>		{
+			proc = new Procedure(t.image);
+			if (symbolTable.has(proc))
+			 	throw new PascalGOException("Simbol for procedure " + t.image + "already exists.");			
+			symbolTable.add(proc);
+			symbolTable.openLevel();
+			}
+	[ <PARENTESISIZ> vars = parFormales()<DOSPUNTOS> <PARENTESISDE> ] <PUNTOYCOMA> 
+		{
+		    if (vars != null)		    {			    proc.merge(vars);
+		   		for(Variable var: proc.getParameters())		   		{		   		    symbolTable.add(var);		  		}
+			}	  
+		}	bloque() <PUNTOYCOMA>
+		{
+			//analizar semanticamente jjtThis
+			//elmimiar nivel actual.
+			symbolTable.eraseLevel();		}   
 	}
 	
 	/* Regla 14 */
-	void parFormales():
-	{}
+	ArrayList<Variable> parFormales():
 	{
-		listaParam() (<PUNTOYCOMA> listaParam())*
+	    ArrayList <Variable> types;;
+	    ArrayList <Variable> auxTypes;
+	}
+	{
+		types = listaParam() (<PUNTOYCOMA> auxTypes= listaParam()			{
+				if (auxTypes != null)
+					types.addAll(auxTypes);			}
+		)*
+		{
+		    return types;		}
 	}
 	
 	/* Regla 15 */
-	void listaParam():
+	ArrayList<Variable> listaParam():
 	{
-		ArrayList<String> parameters = new ArrayList<String>();
-		String type;
+		ArrayList<Variable> parameters;
 	}
 	{
-		[<VAR>] type = listaVar(parameters)
+		[<VAR>] parameters = listaVar()
 		{
-			/*Añadir los parametros al procedimineto*/
+			return parameters;
 		}
 	}
 	
 	/* Regla 16 */
-	String listaVar(ArrayList<String> variables):
+	ArrayList<Variable> listaVar():
 	{
 		Token t;
+		ArrayList<Variable > variables = new ArrayList<Variable >();
+		BasicType bt = null;
 	}
 	{
 		t = <ID>
 		{
-			variables.add(t.image);
+		    if (symbolTable.localSearch(t.image) == null)
+				variables.add(new Variable(t.image));
+			else
+				throw new PascalGOException(t.image +" id already in use");
 		}
 		(<COMA> 
 		 	t = <ID>
 			{
-				variables.add(t.image);
+		    if (symbolTable.localSearch(t.image) == null)
+				variables.add(new Variable(t.image));
+			else
+				throw new PascalGOException(t.image +" id already in use");
 			}
 		)* 
 		<DOSPUNTOS> t  = <ID>
 		{
-			return t.image;
+		    bt = symbolTable.totalSearch(t.image);
+		    if (bt == null)
+		    	throw new PascalGOException("Type " + t.image + " does not exist");
+		    else
+	    	{
+		    	for (Variable s : variables)
+		    		s.setType(t.image);
+		 	   return variables;
+			}
 		}
 	}
 	
@@ -265,21 +422,30 @@ PARSER_END(PascalGO)
 	
 	/* Regla 23 */
 	void asignLlamada() #Asignement:
-	{}
 	{
-		identifier() restoAsignLlam()
+		BasicType type1 = null;
+	}
+	{
+		type1 = identifier() restoAsignLlam(type1)
 	}
 	
 	/* Regla 24 */
-	void restoAsignLlam():
-	{}
+	void restoAsignLlam(BasicType bt):
+	{
+		Type expresionType = null;
+	}
 	{
 		[
-				<ASIGNACION> expresion()
+				<ASIGNACION> expresionType = expresion()				{
+				    if (bt instanceof Procedure)
+				    	throw new PascalGOException(bt.getName()+" is a procedure, cannot be assigned");
+				   	if (!bt.getName().equals(expresionType.getName()))
+				   		throw new PascalGOException(bt.getName()+" and " + expresionType.getName() + "not compatible");				}
 	/* Regla 25 */
-			|	<PARENTESISIZ> parLlamada() <PARENTESISDE>
+			|	<PARENTESISIZ> parLlamada(bt) <PARENTESISDE>
 		]
 	/* Regla 26 */
+	
 	}
 	
 	/* Regla 27 */
@@ -297,19 +463,38 @@ PARSER_END(PascalGO)
 	}
 	
 	/* Regla 29 */
-	void parLlamada():
-	{}
+	void parLlamada(BasicType p):
 	{
-		expresion() ( <COMA> expresion() )*
+		Type type = null;
+		int contador = 0;
+		Procedure proc = null;
+	}
+	{
+		type = expresion()
+		{
+		    if (p instanceof Procedure)
+				proc = (Procedure) p;
+		    else
+		    	throw new PascalGOException("Incompatible call with type " + p.getName());
+		    if (!type.getName().toLowerCase().equals(proc.getVariable(contador).getType().toLowerCase()))
+		    	throw new PascalGOException("Incompatible types for procedure "+ proc.getName() +"call on parameter "+ contador+1);		} ( <COMA> type = expresion()
+		{
+		    contador++;
+		    if (!type.getName().toLowerCase().equals(proc.getVariable(contador).getType().toLowerCase()))
+		    	throw new PascalGOException("Incompatible types for procedure "+ proc.getName() +"call on parameter "+ contador+1);		}
+		)*
 	}
 	
 	/* Regla 30 */
-	void expresion():
-	{}
+	Type expresion():
+	{
+		Type type1 = null;
+		Type type2 = null;
+	}
 	{ 
-		exprSimple() 
+		type1 = exprSimple() 
 		[ 
-		  opRel() exprSimple()
+		  opRel() type2 = exprSimple()
 		  {
 			  Node exp1,op,exp2;
 			  exp2 = jjtree.popNode();
@@ -318,18 +503,28 @@ PARSER_END(PascalGO)
 			  op.jjtAddChild(exp1,0);
 			  op.jjtAddChild(exp2,1);
 			  jjtree.pushNode(op);
+
+			  if (!type1.equals(type2))
+			  	throw new PascalGOException(exp1 +" and "+ exp2 + " are incompatible for operand" + op);
+			  type1 = new Type("boolean");
 		  }
-		] 
+		]
+		{
+			return type1;
+		}
 	}
 	
 	/* Regla 31 */
-	void exprSimple():
+	Type exprSimple():
 	{
 		Node unaryOp = null;
+		Type type1 = null;
+		Type type2 = null;
+		String o = null;
 	}
 	{
 		[signo() {unaryOp = jjtree.popNode();}] 
-		termino()
+		type1 =termino()
 		{
 			if(unaryOp != null){
 				unaryOp.jjtAddChild(jjtree.popNode(),0);
@@ -337,7 +532,7 @@ PARSER_END(PascalGO)
 			}
 		}
 		( 
-			opAdt() termino()
+			o = opAdt() type2 = termino()
 			{
 				  Node term1,op,term2;
 				  term2 = jjtree.popNode();
@@ -346,18 +541,39 @@ PARSER_END(PascalGO)
 				  op.jjtAddChild(term1,0);
 				  op.jjtAddChild(term2,1);
 				  jjtree.pushNode(op);
+
+				  if (!type1.getName().toLowerCase().equals(type2.getName().toLowerCase()))
+				  	throw new PascalGOException("Incompatible types \""+ type1.getName() +"\" \""+ type2.getName() +"\" for operand " + op);
+				if (o.toLowerCase().equals("or"))
+				{
+				  	if (!type1.getName().toLowerCase().equals("boolean"))
+				  		throw new PascalGOException("Incompatible types for and operation");
+				}
+				else
+				if (!type1.getName().toLowerCase().equals("integer"))
+					throw new PascalGOException("Incompatible types for" + o);
+
+				type1 = type2;
 			}
 		)*
+		{
+			return type1;
+		}
 	}
 	
 	/* Regla 32 */
-	void termino():
-	{}
+	Type termino():
 	{
-		factor() 
+		Type type1 = null;
+		Type type2 = null;
+		String o = null;
+	}
+	{
+		type1 = factor() 
 		( 
-			opMul() factor()
+			o = opMul() type2 = factor()
 			{
+			    
 				  Node fac1,op,fac2;
 				  fac2 = jjtree.popNode();
 				  op    = jjtree.popNode();
@@ -365,63 +581,132 @@ PARSER_END(PascalGO)
 				  op.jjtAddChild(fac1,0);
 				  op.jjtAddChild(fac2,1);
 				  jjtree.pushNode(op);
+				  
+				if (!type1.getName().toLowerCase().equals(type2.getName().toLowerCase()))
+				  	throw new PascalGOException("Incompatible types \""+ type1.getName() +"\" \""+ type2.getName() +"\" for operand " + op);
+				if (o.toLowerCase().equals("and"))				{
+				  	if (!type1.getName().toLowerCase().equals("boolean"))
+				  		throw new PascalGOException("Incompatible types for and operation");
+				}
+				else
+				if (!type1.getName().toLowerCase().equals("integer"))
+					throw new PascalGOException("Incompatible types for" + o);
+
+				type1 = type2;
 			}
 		)*
+		{		    return type1;
+		}
 	}
 	
 	/* Regla 33 */
-	void factor():
+	Type factor():
 	{
-		Token t;		
+		Token t;
+		BasicType bt = null;
+		Type type = null;	
 	}
 	{
 			t = <CTE> 
-			{jjtThis.jjtSetValue(t.image);}
+			{jjtThis.jjtSetValue(t.image);
+			return new Type("Integer");}
 			#Constant		
 	/* Regla 34 */
-		|	identifier()
+		|	bt = identifier()		{
+		    if (bt instanceof Variable)
+		    	return new Type(((Variable)bt).getType());
+		   	else
+		   		return new Type(((Variable)bt).getName());
+		    		}
 	/* Regla 35 */	
 		| 	<NOT> 			
-			factor()			
+			type = factor()			{
+			    if (!type.getName().toLowerCase().equals("boolean"))
+			    	throw new PascalGOException("Operand \"NOT\" not compatible with type " + type.getName());
+			    return type;			}	
 	/* Regla 36 */
-		|	<PARENTESISIZ> expresion() <PARENTESISDE>
+		|	<PARENTESISIZ> type = expresion() <PARENTESISDE>
+		{
+		    return type;		}
 	}
 	
 	/* Regla ajena a la gramatica para tratar identificadores de tipos complejos */
-	void identifier() #Identifier:
+	BasicType identifier() #Identifier:
 	{
 		Token t;
 		Node selector, aux;
+		BasicType variableType = null;
+		BasicType typeType = null;
+		String auxType = null;
 	}
 	{
 		t = <ID>
 		{
 			jjtThis.jjtSetValue(t.image);
-			aux = jjtThis;			
+			aux = jjtThis;
+			//Semantic
+			variableType = symbolTable.totalSearch(t.image);
+			if (variableType == null)
+				throw new PascalGOException (t.image + " first use of this id");
+			else			{
+				if (!(variableType instanceof Variable))
+					throw new PascalGOException (variableType.getName() + " is not a variable");				typeType = symbolTable.totalSearch(((Variable)variableType).getType());
+							}    			
 		}
 		(
-			selector()
+			auxType = selector(((Type)typeType))
 			{
+			    if (!(typeType instanceof ArrayType) && !(typeType instanceof RecordType))
+			    	throw new PascalGOException (variableType.getName() + " the type doesnt accept selector operand");
+				variableType = typeType;
+			   	typeType = symbolTable.totalSearch(auxType);
 				selector = jjtree.popNode();
 				aux.jjtAddChild(selector,0);
 				aux = selector;
 			}
 		)*
+		{
+		    return variableType;		}
 	}
 
 	/* Regla 38 */
-	void selector() #Selector:
+	String selector(Type parentType) #Selector:
 	{
-		Token t; 
+		Token t;
+		Variable var = null;
+		Type auxType = null;
 	}
 	{
 			<CORCHETEIZ> 
-			expresion()
-			{jjtThis.jjtSetValue(jjtree.popNode());}
+			auxType = expresion()
+			{
+			    jjtThis.jjtSetValue(jjtree.popNode());
+			    if (!(parentType instanceof ArrayType))			    {
+			        throw new PascalGOException("\"[ ]\" operator not valid for " +parentType.getName());			    }
+			    else
+			    {
+			        if (auxType.getName().equals("Integer"))
+			        	return ((ArrayType)parentType).getType();
+			        else
+			        	throw new PascalGOException("Expresion inside [ ] does not return integer type");
+			        return null;			    }
+			}
 			<CORCHETEDE>			
 	/* Regla 39 */
 		|	<PUNTO>  t = <ID>
-			{jjtThis.jjtSetValue(t.image);}
+			{
+			    jjtThis.jjtSetValue(t.image);
+			    if (!(parentType instanceof RecordType))			    {
+			        throw new PascalGOException("\".\" operator not valid for " + parentType.getName());			    }
+			    else
+			    {
+			        var = ((RecordType)parentType).getVariable(t.image);
+			        if (var != null)
+			        	return var.getType();
+			        else
+			        	throw new PascalGOException("Field " + t.image + " is not declared in " + parentType.getName());
+			        return null;			    }
+			}
 	}
 	
 	/* Regla 40 */
@@ -470,23 +755,23 @@ PARSER_END(PascalGO)
 	}
 	
 	/* Regla 43 */
-	void opAdt() #opAdt:
+	String opAdt() #opAdt:
 	{		
 	}
 	{	
-			<SUMA>  {jjtThis.value = "+";}
-		| 	<RESTA> {jjtThis.value = "-";}
-		| 	<OR> 	{jjtThis.value = "OR";}	
+			<SUMA>  {jjtThis.value = "+"; return "+";}
+		| 	<RESTA> {jjtThis.value = "-"; return "-";}
+		| 	<OR> 	{jjtThis.value = "OR"; return "OR";}	
 	}
 	
 	/* Regla 44 */
-	void opMul() #opMul:
+	String opMul() #opMul:
 	{}
 	{
-			<MULT> 	{jjtThis.value = "*";}
-		|	<DIV>	{jjtThis.value = "div";}
-		|	<MOD>	{jjtThis.value = "mod";}
-		|	<AND>	{jjtThis.value = "and";}
+			<MULT> 	{jjtThis.value = "*"; return "*";}
+		|	<DIV>	{jjtThis.value = "DIV"; return "DIV";}
+		|	<MOD>	{jjtThis.value = "MOD"; return "MOD";}
+		|	<AND>	{jjtThis.value = "AND"; return "AND";}
 	}
 	
 	/* Regla 45 */

@@ -28,7 +28,7 @@ public class IntermediateCodeGenerator implements PascalGOVisitor {
 		System.out.println("     "+result);	
 	}
 	
-	@Override
+	
 	public Object visit(SimpleNode node, Object data) {
 		String result;
 		result = "(END)";
@@ -39,7 +39,7 @@ public class IntermediateCodeGenerator implements PascalGOVisitor {
 		return null;
 	}
 
-	@Override
+	
 	public Object visit(NodePrograma node, Object data) {
 		String result;
 		result = "(END)";
@@ -50,7 +50,7 @@ public class IntermediateCodeGenerator implements PascalGOVisitor {
 		return null;
 	}
 	
-	@Override
+	
 	public Object visit(NodeBlock node, Object data) {
 		for (int i = 0; i < node.jjtGetNumChildren(); i++) {
 			node.jjtGetChild(i).jjtAccept(this, null);
@@ -58,13 +58,13 @@ public class IntermediateCodeGenerator implements PascalGOVisitor {
 		return null;
 	}
 
-	@Override
+	
 	public Object visit(NodeProcedure node, Object data) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
+	
 	public Object visit(NodeAsignement node, Object data) {		
 		String result = "(str";		
 		for (int i = 0; i < node.jjtGetNumChildren(); i++) {
@@ -75,10 +75,11 @@ public class IntermediateCodeGenerator implements PascalGOVisitor {
 		return null;
 	}
 
-	@Override
+	
 	public Object visit(NodeConditional node, Object data) {
 		String result;
 		String label = getIfLabel();
+		String label2= getIfLabel();
 		result = "(BCN";
 		int numChilds = node.jjtGetNumChildren();
 		result += ","+node.jjtGetChild(0).jjtAccept(this, null);
@@ -90,13 +91,15 @@ public class IntermediateCodeGenerator implements PascalGOVisitor {
 		}else{
 			//Else branch
 			node.jjtGetChild(1).jjtAccept(this, null);
+			printResult("(BCH,"+label2+")");
 			System.out.println(label);
 			node.jjtGetChild(2).jjtAccept(this, null);
+			System.out.println(label2);
 		}
 		return null;
 	}
 
-	@Override
+	
 	public Object visit(NodeLoop node, Object data) {
 		String result;
 		String startLabel = getWhileLabel();
@@ -114,7 +117,7 @@ public class IntermediateCodeGenerator implements PascalGOVisitor {
 		return null;
 	}
 
-	@Override
+	
 	public Object visit(NodeopRel node, Object data) {
 		String result;
 		int temporalReg = this.getTemporalReg();
@@ -127,7 +130,7 @@ public class IntermediateCodeGenerator implements PascalGOVisitor {
 		return "R"+temporalReg;
 	}
 
-	@Override
+	
 	public Object visit(NodeopAdt node, Object data) {
 		String result;
 		int temporalReg = this.getTemporalReg();
@@ -140,7 +143,7 @@ public class IntermediateCodeGenerator implements PascalGOVisitor {
 		return "R"+temporalReg;
 	}
 
-	@Override
+	
 	public Object visit(NodeopMul node, Object data) {
 		String result;
 		int temporalReg = this.getTemporalReg();
@@ -153,12 +156,12 @@ public class IntermediateCodeGenerator implements PascalGOVisitor {
 		return "R"+temporalReg;
 	}
 
-	@Override
+	
 	public Object visit(NodeConstant node, Object data) {
 		return node.jjtGetValue();
 	}
 
-	@Override
+	
 	public Object visit(NodeSigno node, Object data) {
 		String result;
 		int temporalReg = this.getTemporalReg();
@@ -171,7 +174,6 @@ public class IntermediateCodeGenerator implements PascalGOVisitor {
 		return "R"+temporalReg;
 	}
 
-	@Override
 	public Object visit(NodeSelector node, Object data) {
 		String result;
 		if (node.jjtGetValue() instanceof String) {
@@ -186,7 +188,7 @@ public class IntermediateCodeGenerator implements PascalGOVisitor {
 		return result;
 	}
 
-	@Override
+	
 	public Object visit(NodeIdentifier node, Object data) {
 		String result;
 		result = (String) node.jjtGetValue();

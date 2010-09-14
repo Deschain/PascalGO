@@ -1,0 +1,20 @@
+program prueba;
+const
+hola = 1;
+yeti = 2;
+type
+tipo = array [1..5] of Integer;
+var
+primero :Integer;
+segundo :Integer;
+tercero,cuarto : Integer;
+begin
+primero := 5 + hola;
+segundo := primero - yeti;
+tercero := primero + segundo;
+cuarto := 0;
+if (tercero <> cuarto) then
+begin
+	cuarto := tercero;
+end;
+end.

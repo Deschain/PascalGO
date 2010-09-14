@@ -1,19 +1,22 @@
 package pascalGO.types;
 
-public class ArrayType extends BasicType {
+public class ArrayType extends Type {
 
-	private String name;
+	private String type;
 	private int rangoInferior = 0;
 	private int rangoSuperior = 0;
 	
-	public ArrayType(String name) {
+	public ArrayType(){
 		super();
-		this.name = name;
+	}
+	
+	public ArrayType(String name) {
+		super(name);
 	}
 	
 	public ArrayType(String name, String type, int rangoInferior, int rangoSuperior){
-		super(type);
-		this.name = name;
+		super(name);
+		this.type = type;
 		this.rangoInferior = rangoInferior;
 		this.rangoSuperior = rangoSuperior;
 	}
@@ -25,13 +28,13 @@ public class ArrayType extends BasicType {
 			return true;
 		}
 	}
-
-	public String getName() {
-		return name;
+	
+	public String getType(){
+		return type;
 	}
-
-	public void setName(String name) {
-		this.name = name;
+	
+	public void setType(String type){
+		this.type = type;
 	}
 
 	public int getRangoInferior() {

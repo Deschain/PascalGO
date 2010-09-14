@@ -2,20 +2,11 @@ package pascalGO.types;
 
 public class Constant extends BasicType {
 
-	private String name;
 	private String value;
 	
 	public Constant(String name, String value){
-		this.name = value;
+		super(name);
 		this.value = value;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
 	}
 
 	public String getValue() {
@@ -26,4 +17,12 @@ public class Constant extends BasicType {
 		this.value = value;
 	}
 
+	public boolean isNumeric(){
+		try{
+			Integer.parseInt(value);
+			return true;
+		}catch (NumberFormatException e){
+			return false;
+		}
+	}
 }

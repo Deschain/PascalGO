@@ -15,11 +15,11 @@ public class BasicType {
 		this.used = false;
 	}
 	
-	public String getType(){
+	public String getName(){
 		return this.name;
 	}
 	
-	public void setType(String name){
+	public void setName(String name){
 		this.name = name;
 	}
 	

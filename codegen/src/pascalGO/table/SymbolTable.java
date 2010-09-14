@@ -2,6 +2,7 @@ package pascalGO.table;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
 
 import pascalGO.types.*;
 
@@ -25,6 +26,7 @@ public class SymbolTable {
 	// Erase a level in the symbol table
 	public void eraseLevel() {
 		// TODO Auto-generated method stub
+		levels.remove(actualLevel);
 		this.actualLevel--;
 	}
 
@@ -44,4 +46,16 @@ public class SymbolTable {
 		return totalSearchResult;
 	}
 	
+	public boolean has(String id){
+		return (totalSearch(id) != null);	
+	}
+	
+	public boolean has(BasicType id){
+		return (totalSearch(id.getName()) != null);
+			
+	}
+	
+	public void add(BasicType bt){
+		levels.get(actualLevel).put(bt.getName(),bt);
+	}
 }
