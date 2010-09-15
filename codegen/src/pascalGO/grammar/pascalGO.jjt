@@ -37,8 +37,8 @@ PARSER_BEGIN(PascalGO)
 
 			//Code for Input management.
 			java.io.InputStream istream = null;
-			if (argum.length == 0)			{
-			    istream = System.in;			}if (argum.length == 1)			{
+			if (argum == null || argum.length == 0)			{
+			    istream = System.in;			}else if (argum.length == 1)			{
 			    try			    {				    istream = new FileInputStream(argum[0]);
 				}catch(FileNotFoundException e)				{
 				System.out.println("Error in execution of pascalGO:");
@@ -317,14 +317,15 @@ PARSER_END(PascalGO)
 		ArrayList <Variable > vars = null;
 	}
 	{
-	<PROCEDURE> t=<ID>		{
+	<PROCEDURE> t=<ID>
+		{jjtThis.jjtSetValue(t.image);}		{
 			proc = new Procedure(t.image);
 			if (symbolTable.has(proc))
-			 	throw new PascalGOException("Simbol for procedure " + t.image + "already exists.");			
+			 	throw new PascalGOException("Simbol for procedure " + t.image + "already exists.");			
 			symbolTable.add(proc);
 			symbolTable.openLevel();
 			}
-	[ <PARENTESISIZ> vars = parFormales()<DOSPUNTOS> <PARENTESISDE> ] <PUNTOYCOMA> 
+	[ <PARENTESISIZ> vars = parFormales()<PARENTESISDE> ] <PUNTOYCOMA> 
 		{
 		    if (vars != null)		    {			    proc.merge(vars);
 		   		for(Variable var: proc.getParameters())		   		{		   		    symbolTable.add(var);		  		}

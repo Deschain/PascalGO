@@ -60,19 +60,34 @@ public class IntermediateCodeGenerator implements PascalGOVisitor {
 
 	
 	public Object visit(NodeProcedure node, Object data) {
-		// TODO Auto-generated method stub
+		String label = (String)node.jjtGetValue();
+		System.out.println(label);
+		for(int i=0;i<node.jjtGetNumChildren(); i++){
+			node.jjtGetChild(i).jjtAccept(this, null);
+		}
+		printResult("(RET)");
 		return null;
 	}
 
 	
-	public Object visit(NodeAsignement node, Object data) {		
-		String result = "(str";		
-		for (int i = 0; i < node.jjtGetNumChildren(); i++) {
-			result += "," + node.jjtGetChild(i).jjtAccept(this, null);
+	public Object visit(NodeAsignement node, Object data) {
+		int numChilds = node.jjtGetNumChildren();
+		if(numChilds==2){
+			String result = "(str";		
+			for (int i = 0; i < node.jjtGetNumChildren(); i++) {
+				result += "," + node.jjtGetChild(i).jjtAccept(this, null);
+			}
+			result += ")";
+			printResult(result);				
+			return null;	
+		}else{
+			String result = "(call,";
+			result += node.jjtGetChild(0).jjtAccept(this, null);
+			result += ")";
+			printResult(result);
+			return null;
 		}
-		result += ")";
-		printResult(result);				
-		return null;
+		
 	}
 
 	
