@@ -25,28 +25,30 @@ PARSER_BEGIN(PascalGO)
 	
 	public class PascalGO 
 	{
-	    
+	    //Definition of Basic Type ids.
 		private static String INTEGER = "Integer";
 		private static String BOOLEAN = "Boolean";
-	
+
+		//SymbolTable
 		private static SymbolTable symbolTable = new SymbolTable();		
-		
+
+		//Main program
 		public static void main (String[] argum) throws ParseException{
 
 
 			//Code for Input management.
 			java.io.InputStream istream = null;
-			if (argum.length == 0)			{
-			    istream = System.in;			}else if (argum.length == 1)			{
+			if (argum.length == 0) //No parameters, read from stdin			{
+			    istream = System.in;			}else if (argum.length == 1) //One parameter, expected name of file, read from file			{
 			    try			    {				    istream = new FileInputStream(argum[0]);
-				}catch(FileNotFoundException e)				{
+				}catch(FileNotFoundException e)//File does not exists				{
 				System.out.println("Execution error:");
 				System.out.println(e.getMessage());
 			    System.out.println("Usage:");
 			    System.out.println("	pascalGO");
 			    System.out.println("	pascalGO filename");
 			    return;				}
-			}else			{
+			}else //Incorrect number of parameters			{
 			    System.out.println("Execution error:");
 			    System.out.println("Usage:");
 			    System.out.println("	pascalGO");
@@ -56,25 +58,22 @@ PARSER_BEGIN(PascalGO)
 		  SimpleNode tree = null;
 			try{
 
+				//Default types and Constants (Compiler types and constants)
 				symbolTable.add(new Type("Integer"));
 				symbolTable.add(new Type("Boolean"));
 				symbolTable.add(new Constant("TRUE","1","Boolean"));
 				symbolTable.add(new Constant("FALSE","0","Boolean"));
 
-			    				PascalGO analizador = new PascalGO(istream);			
-				//Llamar al metodo que reconoce la primera expresion del sintactico
+			    //Initialize the parser				PascalGO analizador = new PascalGO(istream);			
 				tree = analizador.start();
 				IntermediateCodeGenerator visitor = new IntermediateCodeGenerator();
 
 
-				//Sintactico y sem‡ntico completo y v‡lido.
 	
-				//Genera el c—digo.
+				//Code Generation (Sintactic and semanic checks done during the parsing)
 				visitor.visit(tree,null);
 				System.out.println();
-				//tree.dump("");
-				//Mensajes de salida como exito
-				//System.out.println("Todo ha ido bien");		
+				//Completed with success
 			}catch(PascalGOException e){
 			    System.out.println(e.toString());			}catch(ParseException error){				
 				  int[][] expectedTokens = error.expectedTokenSequences;
@@ -85,7 +84,6 @@ PARSER_BEGIN(PascalGO)
 					        System.out.println(tokenImage[expectedTokens[i][j]]+' ');
 					  }				  }
 				  System.out.println("Received: "+error.currentToken.next.image.toLowerCase());
-				  //tree.dump("");			   			  
 			}catch(Exception error){
 				error.printStackTrace();			}
 			return;
@@ -273,12 +271,10 @@ PARSER_END(PascalGO)
 		variables =  listaVar()
 			{
 				record.merge(variables);
-				/* Añadir las variables al registro */
 			}
 		(variables = listaVar()
 			{
 			    record.merge(variables);
-				/* Añadir las variables al registro */
 			}
 		<PUNTOYCOMA>)* <END>		{
 		    return record;		}

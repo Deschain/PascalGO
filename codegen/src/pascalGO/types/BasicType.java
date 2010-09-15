@@ -1,34 +1,59 @@
 package pascalGO.types;
 
+/**
+ * Parent class for all elements to be stored in the Symbol Table
+ * @See PascalGO.table.SymbolTable.java
+ * @author Óscar Rodriguez Zaloña
+ * @author Gonzalo José Canelada
+ */
 public class BasicType {
 
 	private String name;
 	private boolean used = false;
 	
+	/**
+	 * Default constructor
+	 */
 	public BasicType(){
 		name = null;	
 		this.used = false;
 	}
 	
+	/**
+	 * Default constructor
+	 * @param name String name/id of the element.
+	 */
 	public BasicType(String name){
 		this.name = name;
 		this.used = false;
 	}
-	
-	public String getName(){
-		return this.name.toLowerCase();
+
+	/**
+	 * @return the name
+	 */
+	public String getName() {
+		return name;
 	}
-	
-	public void setName(String name){
+
+	/**
+	 * @param name the name to set
+	 */
+	public void setName(String name) {
 		this.name = name;
 	}
-	
-	public void use(){
-		this.used = true;
+
+	/**
+	 * @return the used
+	 */
+	public boolean isUsed() {
+		return used;
 	}
-	
-	public boolean isUsed(){
-		return this.used;
+
+	/**
+	 * @param used the used to set
+	 */
+	public void setUsed(boolean used) {
+		this.used = used;
 	}
 
 }
