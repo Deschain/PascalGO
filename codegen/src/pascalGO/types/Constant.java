@@ -66,7 +66,7 @@ public class Constant extends BasicType {
 	 * @return the type
 	 */
 	public String getType() {
-		return type;
+		return type.toLowerCase();
 	}
 
 	/**

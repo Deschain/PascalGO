@@ -58,7 +58,7 @@ public class ArrayType extends Type {
 	 * @return the type
 	 */
 	public String getType() {
-		return type;
+		return type.toLowerCase();
 	}
 
 	/**

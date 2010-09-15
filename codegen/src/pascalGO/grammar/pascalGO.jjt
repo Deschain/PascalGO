@@ -26,8 +26,8 @@ PARSER_BEGIN(PascalGO)
 	public class PascalGO 
 	{
 	    //Definition of Basic Type ids.
-		private static String INTEGER = "Integer";
-		private static String BOOLEAN = "Boolean";
+		private static String INTEGER = "integer";
+		private static String BOOLEAN = "boolean";
 
 		//SymbolTable
 		private static SymbolTable symbolTable = new SymbolTable();		
@@ -59,10 +59,10 @@ PARSER_BEGIN(PascalGO)
 			try{
 
 				//Default types and Constants (Compiler types and constants)
-				symbolTable.add(new Type("Integer"));
-				symbolTable.add(new Type("Boolean"));
-				symbolTable.add(new Constant("TRUE","1","Boolean"));
-				symbolTable.add(new Constant("FALSE","0","Boolean"));
+				symbolTable.add(new Type("integer"));
+				symbolTable.add(new Type("boolean"));
+				symbolTable.add(new Constant("TRUE","1","boolean"));
+				symbolTable.add(new Constant("FALSE","0","boolean"));
 
 			    //Initialize the parser				PascalGO analizador = new PascalGO(istream);			
 				tree = analizador.start();
