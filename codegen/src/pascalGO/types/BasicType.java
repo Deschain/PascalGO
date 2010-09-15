@@ -16,7 +16,7 @@ public class BasicType {
 	}
 	
 	public String getName(){
-		return this.name;
+		return this.name.toLowerCase();
 	}
 	
 	public void setName(String name){

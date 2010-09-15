@@ -3,13 +3,13 @@ const
 hola = 1;
 yeti = 2;
 type
-tipo = array [1..5] of Integer;
+tipo = array [1..5] of integer;
 var
 primero :Integer;
 segundo :Integer;
-tercero,cuarto : Integer;
+tercero,cuarto : integer;
 begin
-primero := 5 + hola;
+primero := -5 + hola;
 segundo := primero - yeti;
 tercero := primero + segundo;
 cuarto := 0;

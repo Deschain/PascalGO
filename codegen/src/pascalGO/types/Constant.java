@@ -18,7 +18,7 @@ public class Constant extends BasicType {
 	}
 
 	public String getValue() {
-		return value;
+		return value.toLowerCase();
 	}
 
 	public void setValue(String value) {
@@ -26,7 +26,7 @@ public class Constant extends BasicType {
 	}
 
 	public String getType(){
-		return type;
+		return type.toLowerCase();
 	}
 	
 	public void setType(String type){
