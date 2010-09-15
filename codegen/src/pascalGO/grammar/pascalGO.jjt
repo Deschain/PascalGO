@@ -142,11 +142,6 @@ PARSER_END(PascalGO)
 	}
 	
 	/* Regla 5 */
-	/**
-		This method evaluates the definition of a constant.
-		There can be no elements with the same name
-		The value must either be boolean ("TRUE" or "FALSE"), an integer, or another constant
-	*/
 	void unaConst():
 	{
 		Token constName;
