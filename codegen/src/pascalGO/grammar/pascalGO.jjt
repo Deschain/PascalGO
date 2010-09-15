@@ -59,8 +59,8 @@ PARSER_BEGIN(PascalGO)
 
 				symbolTable.add(new Type("Integer"));
 				symbolTable.add(new Type("Boolean"));
-				symbolTable.add(new Constant("TRUE","1"));
-				symbolTable.add(new Constant("FALSE","0"));
+				symbolTable.add(new Constant("TRUE","1","Boolean"));
+				symbolTable.add(new Constant("FALSE","0","Boolean"));
 
 			    				PascalGO analizador = new PascalGO(istream);			
 				//Llamar al metodo que reconoce la primera expresion del sintactico
@@ -155,6 +155,7 @@ PARSER_END(PascalGO)
 		Token constName;
 		String constValue;
 		BasicType bt = null;
+		Constant constant = null;
 	}
 	{
 		constName = <ID> <IGUAL> constValue = constante()
@@ -162,14 +163,18 @@ PARSER_END(PascalGO)
 			//boolean
 			bt = symbolTable.localSearch(constName.image);
 			if (bt == null)			{
+			    constant = new Constant(constName.image,constValue);
 			    try			    {			        Integer.parseInt(constValue);
+			        constant.setType("Integer");
 			    }
 			    catch(NumberFormatException e)			    {
 			        bt = symbolTable.localSearch(constValue);
-			   		if (bt != null)
-			   		 if (!(bt instanceof Constant))
-			    		throw new PascalGOException(bt.getName() + "is not a valid value for constant");			    }
-				symbolTable.add(new Constant(constName.image,constValue));
+			   		if (bt != null)			   		{  
+						if (!(bt instanceof Constant))
+							throw new PascalGOException(bt.getName() + "is not a valid value for constant");
+			    		constant.setType(((Constant)bt).getType());
+			 		}			    }
+				symbolTable.add(constant);
 				System.out.println("Constant definition "+constName.image+" with value "+constValue + " added");
 			}
 			else			{
@@ -439,8 +444,10 @@ PARSER_END(PascalGO)
 				<ASIGNACION> expresionType = expresion()				{
 				    if (bt instanceof Procedure)
 				    	throw new PascalGOException(bt.getName()+" is a procedure, cannot be assigned");
-				   	if (!bt.getName().equals(expresionType.getName()))
-				   		throw new PascalGOException(bt.getName()+" and " + expresionType.getName() + "not compatible");				}
+				   	if ((bt instanceof Variable) && (!((Variable)bt).getType().equals(expresionType.getName())))
+				   		throw new PascalGOException(bt.getName()+" and " + expresionType.getName() + " not compatible");
+				   	if (bt instanceof Constant)
+				   		throw new PascalGOException(bt.getName()+" is a constant, cannot be assigned");				}
 	/* Regla 25 */
 			|	<PARENTESISIZ> parLlamada(bt) <PARENTESISDE>
 		]
@@ -616,7 +623,7 @@ PARSER_END(PascalGO)
 		    if (bt instanceof Variable)
 		    	return new Type(((Variable)bt).getType());
 		   	else
-		   		return new Type(((Variable)bt).getName());
+		   		return new Type(bt.getName());
 		    		}
 	/* Regla 35 */	
 		| 	<NOT> 			
@@ -649,9 +656,10 @@ PARSER_END(PascalGO)
 			if (variableType == null)
 				throw new PascalGOException (t.image + " first use of this id");
 			else			{
-				if (!(variableType instanceof Variable))
-					throw new PascalGOException (variableType.getName() + " is not a variable");				typeType = symbolTable.totalSearch(((Variable)variableType).getType());
-							}    			
+			    
+				if (variableType instanceof Constant)				{				    
+					variableType = symbolTable.totalSearch(((Constant)variableType).getType());
+				}else				typeType = symbolTable.totalSearch(((Variable)variableType).getType());			}    			
 		}
 		(
 			auxType = selector(((Type)typeType))
