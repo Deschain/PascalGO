@@ -33,7 +33,16 @@ public class IntermediateCodeGenerator implements PascalGOVisitor {
 		String result;
 		result = "(END)";
 		for (int i = 0; i < node.jjtGetNumChildren(); i++) {
-			node.jjtGetChild(i).jjtAccept(this, null);
+			SimpleNode child = (SimpleNode) node.jjtGetChild(i);
+			String label;
+			if(child instanceof NodeProcedure){
+				label = ((String) child.jjtGetValue()).toUpperCase();
+				System.out.println(label);
+			}else if(child instanceof NodeBlock){
+				label = "MAIN";
+					System.out.println(label);
+			}			
+			child.jjtAccept(this, null);
 		}
 		printResult(result);
 		return null;
@@ -41,12 +50,6 @@ public class IntermediateCodeGenerator implements PascalGOVisitor {
 
 	
 	public Object visit(NodePrograma node, Object data) {
-		String result;
-		result = "(END)";
-		for (int i = 0; i < node.jjtGetNumChildren(); i++) {
-			node.jjtGetChild(i).jjtAccept(this, null);
-		}
-		printResult(result);
 		return null;
 	}
 	
@@ -60,8 +63,6 @@ public class IntermediateCodeGenerator implements PascalGOVisitor {
 
 	
 	public Object visit(NodeProcedure node, Object data) {
-		String label = (String)node.jjtGetValue();
-		System.out.println(label);
 		for(int i=0;i<node.jjtGetNumChildren(); i++){
 			node.jjtGetChild(i).jjtAccept(this, null);
 		}
