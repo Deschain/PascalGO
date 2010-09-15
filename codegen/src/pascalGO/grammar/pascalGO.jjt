@@ -29,8 +29,7 @@ PARSER_BEGIN(PascalGO)
 		private static String INTEGER = "Integer";
 		private static String BOOLEAN = "Boolean";
 	
-		private static SymbolTable symbolTable = new SymbolTable();
-		private static SemanticAnalizer semanticAnalizer = new SemanticAnalizer();
+		private static SymbolTable symbolTable = new SymbolTable();		
 		
 		public static void main (String[] argum) throws ParseException{
 
@@ -38,7 +37,7 @@ PARSER_BEGIN(PascalGO)
 			//Code for Input management.
 			java.io.InputStream istream = null;
 			if (argum.length == 0)			{
-			    istream = System.in;			}if (argum.length == 1)			{
+			    istream = System.in;			}else if (argum.length == 1)			{
 			    try			    {				    istream = new FileInputStream(argum[0]);
 				}catch(FileNotFoundException e)				{
 				System.out.println("Execution error:");
@@ -317,7 +316,8 @@ PARSER_END(PascalGO)
 		ArrayList <Variable > vars = null;
 	}
 	{
-	<PROCEDURE> t=<ID>		{
+	<PROCEDURE> t=<ID>
+		{jjtThis.jjtSetValue(t.image);}		{
 			proc = new Procedure(t.image.toLowerCase());
 			if (symbolTable.has(proc))
 			 	throw new PascalGOException("Simbol for procedure " + t.image.toLowerCase() + "already exists.");			
@@ -449,7 +449,7 @@ PARSER_END(PascalGO)
 				   	if (bt instanceof Constant)
 				   		throw new PascalGOException(bt.getName()+" is a constant, cannot be assigned");				}
 	/* Regla 25 */
-			|	<PARENTESISIZ> parLlamada(bt) <PARENTESISDE>
+			|	<PARENTESISIZ> [parLlamada(bt)] <PARENTESISDE>
 		]
 	/* Regla 26 */
 	
